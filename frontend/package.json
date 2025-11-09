@@ -7,20 +7,28 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.19",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/svelte": "^5.2.8",
     "@tsconfig/svelte": "^5.0.5",
     "@types/node": "^24.6.0",
+    "@vitest/ui": "^4.0.8",
     "autoprefixer": "^10.4.21",
+    "jsdom": "^27.1.0",
     "postcss": "^8.5.6",
     "svelte": "^5.39.6",
     "svelte-check": "^4.3.2",
     "tailwindcss": "^4.1.17",
     "typescript": "~5.9.3",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vitest": "^4.0.8"
   }
 }

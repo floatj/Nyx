@@ -2,13 +2,17 @@
   import { onMount } from 'svelte';
   import { gameStore, hasError, isGameOver } from '../stores/gameStore';
   import { apiService } from '../services/api';
+  import SaveSlotModal from '../components/SaveSlotModal.svelte';
   import StoryPane from '../components/StoryPane.svelte';
   import ChoiceList from '../components/ChoiceList.svelte';
   import TokenMeter from '../components/TokenMeter.svelte';
   import type { GameMode } from '../stores/gameStore';
+  import type { SaveSlot } from '../services/storage';
 
   let tokenBudget = 20000;
   let selectedMode: GameMode | null = null;
+  let showSaveModal = false;
+  let saveModalMode: 'save' | 'load' = 'save';
 
   // Watch for choice selection to trigger next turn
   $: {
@@ -88,6 +92,50 @@
       executeTurn();
     }
   }
+
+  function openSaveModal() {
+    saveModalMode = 'save';
+    showSaveModal = true;
+  }
+
+  function openLoadModal() {
+    saveModalMode = 'load';
+    showSaveModal = true;
+  }
+
+  function handleLoadGame(slot: SaveSlot) {
+    // Restore game state from save
+    gameStore.dispatch({ type: 'RESET' });
+
+    // Update game store with loaded data
+    const data = slot.data;
+
+    // Dispatch events to restore state
+    gameStore.dispatch({ type: 'SELECT_MODE', mode: data.mode as GameMode });
+    gameStore.dispatch({ type: 'START_GAME' });
+    gameStore.dispatch({
+      type: 'SESSION_READY',
+      sessionId: data.sessionId || '',
+      token: data.sessionToken || '',
+    });
+
+    // Manually update store state (workaround for complex restoration)
+    gameStore.subscribe((state) => {
+      if (state.state === 'streaming') {
+        // Inject saved data
+        Object.assign(state, {
+          history: data.history,
+          currentNarration: data.currentNarration,
+          choices: data.choices,
+          tokenUsed: data.tokenUsed,
+          state: 'awaiting_choice',
+        });
+      }
+    })();
+
+    selectedMode = data.mode as GameMode;
+    tokenBudget = 20000; // Reset or load from session
+  }
 </script>
 
 <div class="min-h-screen bg-gray-900 text-gray-100">
@@ -112,7 +160,7 @@
           <p class="text-gray-400">Select a game mode to begin your journey</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <button
             class="mode-card bg-gray-800 rounded-2xl p-6 hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl"
             on:click={() => startGame('dungeon')}
@@ -144,6 +192,16 @@
             <p class="text-sm text-gray-400">
               Solve a noir crime with clues, suspects, and time pressure
             </p>
+          </button>
+        </div>
+
+        <!-- Load Game Button -->
+        <div class="text-center">
+          <button
+            class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-medium transition-colors"
+            on:click={openLoadModal}
+          >
+            📂 Load Saved Game
           </button>
         </div>
       </div>
@@ -187,6 +245,18 @@
         <div class="max-w-screen-md mx-auto px-4 mt-8">
           <div class="flex justify-center gap-3">
             <button
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-sm transition-colors"
+              on:click={openSaveModal}
+            >
+              💾 Save Game
+            </button>
+            <button
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition-colors"
+              on:click={openLoadModal}
+            >
+              📂 Load Game
+            </button>
+            <button
               class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors"
               on:click={resetGame}
             >
@@ -197,6 +267,14 @@
       {/if}
     {/if}
   </main>
+
+  <!-- Save/Load Modal -->
+  <SaveSlotModal
+    isOpen={showSaveModal}
+    mode={saveModalMode}
+    onClose={() => (showSaveModal = false)}
+    onLoad={handleLoadGame}
+  />
 </div>
 
 <style>
