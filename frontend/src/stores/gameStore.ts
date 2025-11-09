@@ -70,28 +70,36 @@ interface GameStoreState {
 const VALID_TRANSITIONS: Record<GameState, Partial<Record<GameEvent['type'], GameState>>> = {
   uninitialized: {
     SELECT_MODE: 'mode_selection',
+    ERROR: 'error_recoverable',
+    RESET: 'uninitialized',
   },
   mode_selection: {
     START_GAME: 'starting',
+    RESET: 'uninitialized',
   },
   starting: {
     SESSION_READY: 'streaming',
     ERROR: 'error_recoverable',
+    RESET: 'uninitialized',
   },
   streaming: {
+    STREAM_CHUNK: 'streaming', // Allow chunks during streaming
     STREAM_COMPLETE: 'awaiting_choice',
     ERROR: 'error_recoverable',
     PAUSE: 'paused',
+    RESET: 'uninitialized',
   },
   awaiting_choice: {
     SELECT_CHOICE: 'processing_input',
     INPUT_SUBMITTED: 'processing_input',
     PAUSE: 'paused',
     END_GAME: 'game_over',
+    RESET: 'uninitialized',
   },
   processing_input: {
     STREAM_START: 'streaming',
     ERROR: 'error_recoverable',
+    RESET: 'uninitialized',
   },
   paused: {
     RESUME: 'uninitialized', // Will be overridden by previousState
