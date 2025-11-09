@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import pino from 'pino';
+import sessionRouter from './routes/session.js';
+import playRouter from './routes/play.js';
 
 // Load environment variables
 dotenv.config();
@@ -40,9 +42,9 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, timestamp: Date.now() });
 });
 
-// Routes will be added here
-// app.use('/api/session', sessionRouter);
-// app.use('/api/play', playRouter);
+// Routes
+app.use('/api/session', sessionRouter);
+app.use('/api/play', playRouter);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
