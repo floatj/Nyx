@@ -282,10 +282,41 @@ const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
 // Pipe to SSE client…
 ```
 
-**Frontend: consuming SSE**
+**Frontend: consuming SSE (POST with fetch)**
 ```ts
-const es = new EventSource('/api/play', { withCredentials: false });
-es.onmessage = (e) => { /* append chunk; render */ };
+// Note: EventSource only supports GET; use fetch for POST requests
+async function playTurn(payload) {
+  const response = await fetch('/api/play', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${sessionToken}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buffer = '';
+
+  while (true) {
+    const {value, done} = await reader.read();
+    if (done) break;
+
+    buffer += value;
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const chunk = line.slice(6);
+        // Process chunk: append to UI, update state
+        onChunkReceived(chunk);
+      }
+    }
+  }
+}
 ```
 
 **LLM JSON Guard**
