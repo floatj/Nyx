@@ -80,6 +80,9 @@ export class PromptService {
     if (mode === 'custom' && customPrompt) {
       return `${BASE_SYSTEM_PROMPT}
 
+LANGUAGE INSTRUCTION:
+CRITICAL: Generate ALL narration and choices in the SAME LANGUAGE as the custom setting provided below. Match the language exactly - if the custom setting is in Chinese, respond in Chinese; if it's in English, respond in English, etc.
+
 CUSTOM SETTING:
 ${customPrompt}
 
@@ -97,7 +100,7 @@ ${SAFETY_ADDENDUM}`;
 
   buildInitialPrompt(mode: GameMode, customPrompt?: string): string {
     if (mode === 'custom' && customPrompt) {
-      return `Begin the adventure using this setting: ${customPrompt}\n\nDescribe the opening scene and provide 3-4 initial choices for how to proceed.`;
+      return `Begin the adventure. Describe the opening scene and provide 3-4 initial choices for how to proceed. Remember to use the same language as the custom setting.`;
     }
 
     const starters: Record<GameMode, string> = {

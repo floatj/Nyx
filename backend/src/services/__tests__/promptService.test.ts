@@ -41,10 +41,30 @@ describe('PromptService', () => {
     it('should include JSON format instructions', () => {
       const prompt = promptService.buildSystemPrompt('dungeon');
 
-      expect(prompt).toContain('STRICT JSON');
+      expect(prompt).toContain('ONLY valid JSON');
       expect(prompt).toContain('narration');
-      expect(prompt).toContain('choices[]');
+      expect(prompt).toContain('choices');
       expect(prompt).toContain('meta');
+    });
+
+    it('should build system prompt for custom mode with language instruction', () => {
+      const customPrompt = '你是一個勇敢的武士，在古代中國的江湖中冒險。';
+      const prompt = promptService.buildSystemPrompt('custom', customPrompt);
+
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain('LANGUAGE INSTRUCTION');
+      expect(prompt).toContain('SAME LANGUAGE');
+      expect(prompt).toContain('CUSTOM SETTING');
+      expect(prompt).toContain(customPrompt);
+      expect(prompt).toContain('CONTENT SAFETY');
+    });
+
+    it('should build system prompt for custom mode in English', () => {
+      const customPrompt = 'You are a space explorer in the year 3000.';
+      const prompt = promptService.buildSystemPrompt('custom', customPrompt);
+
+      expect(prompt).toContain('LANGUAGE INSTRUCTION');
+      expect(prompt).toContain(customPrompt);
     });
   });
 
@@ -68,6 +88,15 @@ describe('PromptService', () => {
 
       expect(prompt).toContain('detective');
       expect(prompt).toContain('crime scene');
+    });
+
+    it('should build initial prompt for custom mode with language reminder', () => {
+      const customPrompt = '你是一個勇敢的武士，在古代中國的江湖中冒險。';
+      const prompt = promptService.buildInitialPrompt('custom', customPrompt);
+
+      expect(prompt).toContain('Begin the adventure');
+      expect(prompt).toContain('same language');
+      expect(prompt).toContain('3-4 initial choices');
     });
   });
 
