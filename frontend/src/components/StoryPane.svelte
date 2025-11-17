@@ -42,13 +42,13 @@
     <div class="story-history">
       {#each history as message, index}
         {#if message.role === 'assistant'}
-          <div class="story-entry prose prose-invert max-w-none mb-6">
-            <p class="text-lg leading-relaxed">{getNarration(message.content)}</p>
+          <div class="story-entry prose dark:prose-invert max-w-none mb-6">
+            <p class="text-lg leading-relaxed text-gray-800 dark:text-gray-100">{getNarration(message.content)}</p>
           </div>
         {:else if message.role === 'user'}
           <div class="choice-entry mb-6">
-            <div class="inline-block bg-indigo-900/50 border border-indigo-500/50 rounded-lg px-4 py-2">
-              <p class="text-indigo-200 font-medium">▶ {message.content}</p>
+            <div class="inline-block bg-indigo-100 dark:bg-indigo-900/50 border border-indigo-300 dark:border-indigo-500/50 rounded-lg px-4 py-2">
+              <p class="text-indigo-800 dark:text-indigo-200 font-medium">▶ {message.content}</p>
             </div>
           </div>
         {/if}
@@ -57,8 +57,8 @@
   {/if}
 
   {#if $isLoading && streamBuffer}
-    <div class="streaming-text prose prose-invert max-w-none mt-4">
-      <p class="text-lg leading-relaxed">
+    <div class="streaming-text prose dark:prose-invert max-w-none mt-4">
+      <p class="text-lg leading-relaxed text-gray-800 dark:text-gray-100">
         {streamBuffer}<span class="streaming-cursor"></span>
       </p>
     </div>
