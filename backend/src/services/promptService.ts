@@ -1,6 +1,6 @@
 import type { GameMode, CharacterStatus } from '../types/index.js';
 
-const BASE_SYSTEM_PROMPT = `You are a text RPG engine. You MUST output ONLY valid JSON, nothing else.
+const BASE_SYSTEM_PROMPT_CORE = `You are a text RPG engine. You MUST output ONLY valid JSON, nothing else.
 
 CRITICAL REQUIREMENTS:
 1. Output ONLY the JSON object, no explanations or markdown
@@ -10,13 +10,16 @@ CRITICAL REQUIREMENTS:
 5. For the opening scene (first turn), you MAY use up to 12-24 sentences.
 6. Each choice label must be <= 15 words
 7. CONTINUE THE STORY: When you see previous narration, ADVANCE the plot based on the user's choice/action. DO NOT repeat or regenerate previous scenes!
-8. ALWAYS include characterStatus reflecting current character state
 
 STORY CONTINUATION:
 - If there is previous narration in the conversation, the user's message is their CHOICE/ACTION in response to that narration
 - Build upon what has already happened - advance the story forward
 - Acknowledge the user's choice and show its consequences
-- Create NEW situations and developments, don't restart or repeat the opening
+- Create NEW situations and developments, don't restart or repeat the opening`;
+
+const CHARACTER_STATUS_PROMPT_ADDON = `
+
+8. ALWAYS include characterStatus reflecting current character state
 
 EXACT FORMAT (copy this structure):
 {
@@ -46,7 +49,22 @@ CHARACTER STATUS GUIDELINES:
 - Conditions: Set to true when narratively appropriate (e.g., poisoned by trap, blessed by shrine, injured in combat, cursed by artifact)
 - Inventory: Add items when found/received, remove when used/lost. Keep list concise (max 20 items).
 - Update status to reflect narrative events consistently (if character gets hurt, reduce health proportionally)
-- If health reaches 0, set meta.ending = true and narrate death
+- If health reaches 0, set meta.ending = true and narrate death`;
+
+const NO_CHARACTER_STATUS_PROMPT_ADDON = `
+
+EXACT FORMAT (copy this structure):
+{
+  "narration": "Your vivid second-person narration here.",
+  "choices": [
+    {"id": "option1", "label": "First meaningful action"},
+    {"id": "option2", "label": "Second different action"},
+    {"id": "option3", "label": "Third alternative action"}
+  ],
+  "meta": {"danger": 0.3, "loot": false, "ending": false}
+}`;
+
+const CLOSING_REMINDER = `
 
 IMPORTANT: Do NOT wrap in markdown code blocks. Output the raw JSON only.`;
 
@@ -131,9 +149,13 @@ export function getInitialCharacterStatus(mode: GameMode): CharacterStatus {
 }
 
 export class PromptService {
-  buildSystemPrompt(mode: GameMode, customPrompt?: string): string {
+  buildSystemPrompt(mode: GameMode, customPrompt?: string, characterStatusEnabled: boolean = true): string {
+    // Choose the appropriate format addon
+    const formatAddon = characterStatusEnabled ? CHARACTER_STATUS_PROMPT_ADDON : NO_CHARACTER_STATUS_PROMPT_ADDON;
+    const basePrompt = BASE_SYSTEM_PROMPT_CORE + formatAddon + CLOSING_REMINDER;
+
     if (mode === 'custom' && customPrompt) {
-      return `${BASE_SYSTEM_PROMPT}
+      return `${basePrompt}
 
 LANGUAGE INSTRUCTION:
 CRITICAL: Generate ALL narration and choices in the SAME LANGUAGE as the custom setting provided below. Match the language exactly - if the custom setting is in Chinese, respond in Chinese; if it's in English, respond in English, etc.
@@ -146,34 +168,35 @@ ${SAFETY_ADDENDUM}`;
 
     const modeLore = MODE_LORE[mode] || MODE_LORE.dungeon;
 
-    return `${BASE_SYSTEM_PROMPT}
+    return `${basePrompt}
 
 ${modeLore}
 
 ${SAFETY_ADDENDUM}`;
   }
 
-  buildInitialPrompt(mode: GameMode, customPrompt?: string): string {
-    const initialStatus = getInitialCharacterStatus(mode);
-    const statusJson = JSON.stringify(initialStatus);
+  buildInitialPrompt(mode: GameMode, customPrompt?: string, characterStatusEnabled: boolean = true): string {
+    const statusContext = characterStatusEnabled
+      ? ` Starting character status: ${JSON.stringify(getInitialCharacterStatus(mode))}`
+      : '';
 
     if (mode === 'custom' && customPrompt) {
-      return `Begin the adventure. Starting character status: ${statusJson}
+      return `Begin the adventure.${statusContext}
 
 Describe the opening scene and provide 3-4 initial choices for how to proceed. Remember to use the same language as the custom setting.`;
     }
 
     const starters: Record<GameMode, string> = {
-      dungeon: `Begin the adventure. The player stands at the entrance of dark catacombs. Starting character status: ${statusJson}
+      dungeon: `Begin the adventure. The player stands at the entrance of dark catacombs.${statusContext}
 
 Describe what they see and provide 3-4 initial choices for how to proceed.`,
-      journey: `Begin the adventure. The player is a humble villager who has just received a mysterious summons. Starting character status: ${statusJson}
+      journey: `Begin the adventure. The player is a humble villager who has just received a mysterious summons.${statusContext}
 
 Describe the moment and provide 3-4 choices.`,
-      mystery: `Begin the adventure. The player is a detective arriving at a crime scene. Starting character status: ${statusJson}
+      mystery: `Begin the adventure. The player is a detective arriving at a crime scene.${statusContext}
 
 Describe what they observe and provide 3-4 initial investigation choices.`,
-      custom: `Begin the adventure. Starting character status: ${statusJson}
+      custom: `Begin the adventure.${statusContext}
 
 Describe the opening scene and provide 3-4 initial choices.`,
     };

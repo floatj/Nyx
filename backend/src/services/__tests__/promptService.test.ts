@@ -401,4 +401,86 @@ That should work!`;
       expect(prompt).toContain('meta.ending = true');
     });
   });
+
+  describe('buildSystemPrompt with characterStatusEnabled flag', () => {
+    it('should include characterStatus when enabled (default)', () => {
+      const prompt = promptService.buildSystemPrompt('dungeon', undefined, true);
+
+      expect(prompt).toContain('characterStatus');
+      expect(prompt).toContain('CHARACTER STATUS GUIDELINES');
+      expect(prompt).toContain('Health: 0-100');
+      expect(prompt).toContain('Stamina: 0-100');
+    });
+
+    it('should NOT include characterStatus when disabled', () => {
+      const prompt = promptService.buildSystemPrompt('dungeon', undefined, false);
+
+      expect(prompt).not.toContain('characterStatus');
+      expect(prompt).not.toContain('CHARACTER STATUS GUIDELINES');
+      expect(prompt).not.toContain('Health: 0-100');
+      expect(prompt).not.toContain('Stamina: 0-100');
+      // But should still contain core instructions
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain('JSON');
+      expect(prompt).toContain('narration');
+      expect(prompt).toContain('choices');
+    });
+
+    it('should work for all modes when character status is disabled', () => {
+      const modes: Array<'dungeon' | 'journey' | 'mystery'> = ['dungeon', 'journey', 'mystery'];
+
+      for (const mode of modes) {
+        const prompt = promptService.buildSystemPrompt(mode, undefined, false);
+        expect(prompt).not.toContain('characterStatus');
+        expect(prompt).toContain('text RPG engine');
+      }
+    });
+
+    it('should work for custom mode when character status is disabled', () => {
+      const customPrompt = 'You are a space explorer.';
+      const prompt = promptService.buildSystemPrompt('custom', customPrompt, false);
+
+      expect(prompt).not.toContain('characterStatus');
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain(customPrompt);
+    });
+  });
+
+  describe('buildInitialPrompt with characterStatusEnabled flag', () => {
+    it('should include starting character status when enabled (default)', () => {
+      const prompt = promptService.buildInitialPrompt('dungeon', undefined, true);
+
+      expect(prompt).toContain('Starting character status');
+      expect(prompt).toContain('"health":100');
+      expect(prompt).toContain('torch');
+    });
+
+    it('should NOT include starting character status when disabled', () => {
+      const prompt = promptService.buildInitialPrompt('dungeon', undefined, false);
+
+      expect(prompt).not.toContain('Starting character status');
+      expect(prompt).not.toContain('"health":100');
+      // But should still contain core opening instructions
+      expect(prompt).toContain('Begin the adventure');
+      expect(prompt).toContain('catacombs');
+    });
+
+    it('should work for all modes when character status is disabled', () => {
+      const modes: Array<'dungeon' | 'journey' | 'mystery'> = ['dungeon', 'journey', 'mystery'];
+
+      for (const mode of modes) {
+        const prompt = promptService.buildInitialPrompt(mode, undefined, false);
+        expect(prompt).not.toContain('Starting character status');
+        expect(prompt).toContain('Begin the adventure');
+      }
+    });
+
+    it('should work for custom mode when character status is disabled', () => {
+      const customPrompt = 'You are a detective in Victorian London.';
+      const prompt = promptService.buildInitialPrompt('custom', customPrompt, false);
+
+      expect(prompt).not.toContain('Starting character status');
+      expect(prompt).toContain('Begin the adventure');
+    });
+  });
 });
