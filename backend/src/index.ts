@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import pino from 'pino';
 import sessionRouter from './routes/session.js';
 import playRouter from './routes/play.js';
+import promptRouter from './routes/prompt.js';
 
 // Load environment variables
 dotenv.config();
@@ -45,6 +46,7 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/session', sessionRouter);
 app.use('/api/play', playRouter);
+app.use('/api/prompt', promptRouter);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

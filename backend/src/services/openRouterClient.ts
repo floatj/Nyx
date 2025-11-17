@@ -126,7 +126,21 @@ export class OpenRouterClient {
     messages: Message[];
     temperature?: number;
     max_tokens?: number;
+    json_output?: boolean;
   }): Promise<OpenRouterResponse> {
+    const bodyParams: any = {
+      model: params.model || 'anthropic/claude-3-haiku',
+      messages: params.messages,
+      temperature: params.temperature ?? 0.7,
+      max_tokens: params.max_tokens ?? 600,
+      stream: false,
+    };
+
+    // Only add response_format if json_output is explicitly true
+    if (params.json_output) {
+      bodyParams.response_format = { type: 'json_object' };
+    }
+
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -135,14 +149,7 @@ export class OpenRouterClient {
         'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
         'X-Title': 'AI Text RPG',
       },
-      body: JSON.stringify({
-        model: params.model || 'anthropic/claude-3-haiku',
-        messages: params.messages,
-        temperature: params.temperature ?? 0.7,
-        max_tokens: params.max_tokens ?? 600,
-        stream: false,
-        response_format: { type: 'json_object' }, // Force JSON output
-      }),
+      body: JSON.stringify(bodyParams),
     });
 
     if (!response.ok) {
