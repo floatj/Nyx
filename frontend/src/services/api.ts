@@ -57,7 +57,7 @@ export class ApiService {
    * Returns an async generator that yields chunks and final output
    */
   async *playTurn(request: PlayRequest): AsyncGenerator<
-    { type: 'content'; chunk: string } | { type: 'complete'; output: LLMOutput } | { type: 'error'; error: string },
+    { type: 'content'; chunk: string } | { type: 'complete'; output: LLMOutput; tokenUsed?: number } | { type: 'error'; error: string },
     void,
     unknown
   > {
@@ -104,7 +104,7 @@ export class ApiService {
               if (parsed.type === 'content') {
                 yield { type: 'content', chunk: parsed.chunk };
               } else if (parsed.type === 'complete') {
-                yield { type: 'complete', output: parsed.output };
+                yield { type: 'complete', output: parsed.output, tokenUsed: parsed.tokenUsed };
               } else if (parsed.type === 'error') {
                 yield { type: 'error', error: parsed.error };
               }

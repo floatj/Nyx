@@ -43,7 +43,7 @@ export type GameEvent =
   | { type: 'SESSION_READY'; sessionId: string; token: string }
   | { type: 'STREAM_START' }
   | { type: 'STREAM_CHUNK'; data: string }
-  | { type: 'STREAM_COMPLETE'; output: LLMOutput }
+  | { type: 'STREAM_COMPLETE'; output: LLMOutput; tokenUsed?: number }
   | { type: 'SELECT_CHOICE'; choiceId: string }
   | { type: 'INPUT_SUBMITTED'; text: string }
   | { type: 'PAUSE' }
@@ -216,6 +216,7 @@ function createGameStore() {
               choices: event.output.choices,
               history: newHistory,
               streamBuffer: '',
+              tokenUsed: event.tokenUsed !== undefined ? event.tokenUsed : state.tokenUsed,
               state: event.output.meta?.ending ? 'game_over' : 'awaiting_choice',
             };
           }

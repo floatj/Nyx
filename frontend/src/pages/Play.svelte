@@ -70,7 +70,7 @@
         if (event.type === 'content') {
           gameStore.dispatch({ type: 'STREAM_CHUNK', data: event.chunk });
         } else if (event.type === 'complete') {
-          gameStore.dispatch({ type: 'STREAM_COMPLETE', output: event.output });
+          gameStore.dispatch({ type: 'STREAM_COMPLETE', output: event.output, tokenUsed: event.tokenUsed });
         } else if (event.type === 'error') {
           throw new Error(event.error);
         }
