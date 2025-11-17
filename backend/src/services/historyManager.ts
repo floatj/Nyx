@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import type { Message, GameMode, LLMOutput } from '../types/index.js';
 
 const KEEP_RECENT_TURNS = 8;

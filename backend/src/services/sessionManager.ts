@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { randomBytes } from 'crypto';
 import type { Session, SessionResponse } from '../types/index.js';
 

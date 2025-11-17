@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import type { Message } from '../types/index.js';
 
 export interface OpenRouterStreamChunk {
