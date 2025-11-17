@@ -176,7 +176,7 @@
   <!-- Header -->
   <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
     <div class="max-w-screen-lg mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-indigo-400">AI Text RPG</h1>
+      <h1 class="text-2xl font-bold text-indigo-400">Project Nyx</h1>
       {#if $gameStore.sessionId}
         <div class="w-64">
           <TokenMeter used={$gameStore.tokenUsed} budget={tokenBudget} />
