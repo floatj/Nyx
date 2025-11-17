@@ -14,6 +14,7 @@ export interface SaveSlot {
     sessionToken: string | null;
     tokenUsed: number;
     mode: string;
+    characterStatus?: any;
   };
 }
 
@@ -56,6 +57,7 @@ export class StorageService {
         sessionToken: gameState.sessionToken,
         tokenUsed: gameState.tokenUsed,
         mode: gameState.mode,
+        characterStatus: gameState.characterStatus,
       },
     };
 

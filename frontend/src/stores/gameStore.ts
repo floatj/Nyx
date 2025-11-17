@@ -21,9 +21,22 @@ export interface Choice {
   label: string;
 }
 
+export interface CharacterStatus {
+  health: number;
+  stamina: number;
+  conditions: {
+    injured: boolean;
+    poisoned: boolean;
+    blessed: boolean;
+    cursed: boolean;
+  };
+  inventory: string[];
+}
+
 export interface LLMOutput {
   narration: string;
   choices: Choice[];
+  characterStatus?: CharacterStatus;
   meta?: {
     danger?: number;
     loot?: boolean;
@@ -66,6 +79,7 @@ interface GameStoreState {
   sessionId: string | null;
   sessionToken: string | null;
   tokenUsed: number;
+  characterStatus: CharacterStatus | null;
 }
 
 // Valid state transitions
@@ -133,6 +147,7 @@ const initialState: GameStoreState = {
   sessionId: null,
   sessionToken: null,
   tokenUsed: 0,
+  characterStatus: null,
 };
 
 function createGameStore() {
@@ -217,6 +232,7 @@ function createGameStore() {
               history: newHistory,
               streamBuffer: '',
               tokenUsed: event.tokenUsed !== undefined ? event.tokenUsed : state.tokenUsed,
+              characterStatus: event.output.characterStatus || state.characterStatus,
               state: event.output.meta?.ending ? 'game_over' : 'awaiting_choice',
             };
           }

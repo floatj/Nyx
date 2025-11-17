@@ -9,6 +9,7 @@
   import ChoiceList from '../components/ChoiceList.svelte';
   import TokenMeter from '../components/TokenMeter.svelte';
   import Settings from './Settings.svelte';
+  import CharacterSheet from '../components/CharacterSheet.svelte';
   import type { GameMode } from '../stores/gameStore';
   import type { SaveSlot } from '../services/storage';
 
@@ -154,6 +155,7 @@
           currentNarration: data.currentNarration,
           choices: data.choices,
           tokenUsed: data.tokenUsed,
+          characterStatus: data.characterStatus || null,
           state: 'awaiting_choice',
         });
       }
@@ -334,12 +336,25 @@
       {#if $settingsStore.isBossMode}
         <BossModePane />
       {:else}
-        <StoryPane />
-      {/if}
-      {#if !$settingsStore.isBossMode}
-        <ChoiceList />
+        <div class="max-w-screen-xl mx-auto px-4">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Left Sidebar: Character Sheet -->
+            <div class="lg:col-span-1">
+              <div class="sticky top-20">
+                <CharacterSheet status={$gameStore.characterStatus} />
+              </div>
+            </div>
+
+            <!-- Main Content: Story and Choices -->
+            <div class="lg:col-span-3">
+              <StoryPane />
+              <ChoiceList />
+            </div>
+          </div>
+        </div>
       {/if}
 
+      <!-- Error Handling -->
       {#if $hasError && !$settingsStore.isBossMode}
         <div class="max-w-screen-md mx-auto px-4 mt-4">
           <div class="bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-500 rounded-lg p-4">
@@ -358,6 +373,7 @@
         </div>
       {/if}
 
+      <!-- Game Over -->
       {#if $isGameOver && !$settingsStore.isBossMode}
         <div class="max-w-screen-md mx-auto px-4 mt-4">
           <div class="bg-indigo-100 dark:bg-indigo-900/50 border border-indigo-400 dark:border-indigo-500 rounded-lg p-6 text-center">
