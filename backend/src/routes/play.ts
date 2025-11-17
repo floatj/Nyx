@@ -88,11 +88,18 @@ router.post('/', async (req: Request, res: Response) => {
       // Parse final response
       const parsed = promptService.parseModelOutput(fullResponse);
 
-      // Send final parsed output
-      res.write(`data: ${JSON.stringify({ type: 'complete', output: parsed })}\n\n`);
-
       // Update session token usage (rough estimate)
       sessionManager.updateTokenUsage(playRequest.sessionId, estimatedTokens + tokenCount);
+
+      // Get updated session to include current token usage
+      const updatedSession = sessionManager.getSession(playRequest.sessionId);
+
+      // Send final parsed output with token usage
+      res.write(`data: ${JSON.stringify({
+        type: 'complete',
+        output: parsed,
+        tokenUsed: updatedSession?.tokenUsed || 0
+      })}\n\n`);
 
       // Send final event
       res.write(`data: [DONE]\n\n`);
