@@ -8,7 +8,14 @@ CRITICAL REQUIREMENTS:
 3. Each choice must be unique and lead to different outcomes
 4. For normal turns, keep narration to 8-12 sentences.
 5. For the opening scene (first turn), you MAY use up to 12-24 sentences.
-5. Each choice label must be <= 15 words
+6. Each choice label must be <= 15 words
+7. CONTINUE THE STORY: When you see previous narration, ADVANCE the plot based on the user's choice/action. DO NOT repeat or regenerate previous scenes!
+
+STORY CONTINUATION:
+- If there is previous narration in the conversation, the user's message is their CHOICE/ACTION in response to that narration
+- Build upon what has already happened - advance the story forward
+- Acknowledge the user's choice and show its consequences
+- Create NEW situations and developments, don't restart or repeat the opening
 
 EXACT FORMAT (copy this structure):
 {

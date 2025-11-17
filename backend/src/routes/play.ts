@@ -27,13 +27,6 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Session not found or expired' });
     }
 
-    // Debug logging
-    console.log('=== PLAY REQUEST DEBUG ===');
-    console.log('History length:', playRequest.history.length);
-    console.log('Player input:', playRequest.player_input);
-    console.log('History:', JSON.stringify(playRequest.history, null, 2));
-    console.log('=== END DEBUG ===');
-
     // Estimate token cost and check budget
     const systemPrompt = promptService.buildSystemPrompt(playRequest.mode, playRequest.customPrompt);
     const messages = await historyManager.prepareMessages(
@@ -58,31 +51,18 @@ router.post('/', async (req: Request, res: Response) => {
     const lastMsg = messages[messages.length - 1];
     const lastIsUser = lastMsg?.role === 'user';
 
-    console.log('=== MESSAGE CONSTRUCTION DEBUG ===');
-    console.log('Messages after prepareMessages:', messages.length);
-    console.log('Last message role:', lastMsg?.role);
-    console.log('Last is user?', lastIsUser);
-    console.log('Will add player_input?', playRequest.player_input && !lastIsUser);
-    console.log('Will add initial prompt?', playRequest.history.length === 0);
-
     if (playRequest.player_input && !lastIsUser) {
-      console.log('Adding player_input:', playRequest.player_input);
       messages.push({
         role: 'user',
         content: playRequest.player_input,
       });
     } else if (playRequest.history.length === 0) {
       // First turn - add initial prompt
-      console.log('Adding initial prompt');
       messages.push({
         role: 'user',
         content: promptService.buildInitialPrompt(playRequest.mode, playRequest.customPrompt),
       });
     }
-
-    console.log('Final messages count:', messages.length);
-    console.log('Final messages:', messages.map(m => ({ role: m.role, content: typeof m.content === 'string' ? m.content.substring(0, 100) : m.content })));
-    console.log('=== END MESSAGE DEBUG ===');
 
     // Set up SSE headers
     res.setHeader('Content-Type', 'text/event-stream');
