@@ -55,6 +55,17 @@ You describe atmospheric urban environments, suspicious characters, subtle detai
 Plant clues in narration that observant players can piece together.
 Include time pressure (the trail goes cold, suspect might flee).
 Choices affect what information the player gathers and trust with NPCs.`,
+
+  custom: `SETTING: Custom adventure defined by player
+ATMOSPHERE: Varies based on custom prompt
+ELEMENTS: Player-defined setting and themes
+STYLE: Adapts to the custom scenario
+STRUCTURE: Flexible narrative structure
+
+You adapt your narration style to match the custom setting provided.
+Maintain consistency with the world and rules established in the custom prompt.
+Create meaningful choices that fit the custom scenario.
+Build on the custom premise to create an engaging narrative.`,
 };
 
 const SAFETY_ADDENDUM = `
@@ -65,7 +76,16 @@ CONTENT SAFETY:
 - If meta.ending is true, provide a satisfying conclusion to the story`;
 
 export class PromptService {
-  buildSystemPrompt(mode: GameMode): string {
+  buildSystemPrompt(mode: GameMode, customPrompt?: string): string {
+    if (mode === 'custom' && customPrompt) {
+      return `${BASE_SYSTEM_PROMPT}
+
+CUSTOM SETTING:
+${customPrompt}
+
+${SAFETY_ADDENDUM}`;
+    }
+
     const modeLore = MODE_LORE[mode] || MODE_LORE.dungeon;
 
     return `${BASE_SYSTEM_PROMPT}
@@ -75,7 +95,11 @@ ${modeLore}
 ${SAFETY_ADDENDUM}`;
   }
 
-  buildInitialPrompt(mode: GameMode): string {
+  buildInitialPrompt(mode: GameMode, customPrompt?: string): string {
+    if (mode === 'custom' && customPrompt) {
+      return `Begin the adventure using this setting: ${customPrompt}\n\nDescribe the opening scene and provide 3-4 initial choices for how to proceed.`;
+    }
+
     const starters: Record<GameMode, string> = {
       dungeon:
         'Begin the adventure. The player stands at the entrance of dark catacombs. Describe what they see and provide 3-4 initial choices for how to proceed.',
@@ -83,6 +107,8 @@ ${SAFETY_ADDENDUM}`;
         'Begin the adventure. The player is a humble villager who has just received a mysterious summons. Describe the moment and provide 3-4 choices.',
       mystery:
         'Begin the adventure. The player is a detective arriving at a crime scene. Describe what they observe and provide 3-4 initial investigation choices.',
+      custom:
+        'Begin the adventure. Describe the opening scene and provide 3-4 initial choices.',
     };
 
     return starters[mode] || starters.dungeon;

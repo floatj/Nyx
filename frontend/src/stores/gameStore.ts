@@ -13,7 +13,7 @@ export type GameState =
   | 'error_fatal'
   | 'game_over';
 
-export type GameMode = 'dungeon' | 'journey' | 'mystery';
+export type GameMode = 'dungeon' | 'journey' | 'mystery' | 'custom';
 export type MessageRole = 'system' | 'assistant' | 'user';
 
 export interface Choice {
@@ -38,6 +38,7 @@ export interface Message {
 
 export type GameEvent =
   | { type: 'SELECT_MODE'; mode: GameMode }
+  | { type: 'SET_CUSTOM_PROMPT'; prompt: string }
   | { type: 'START_GAME' }
   | { type: 'SESSION_READY'; sessionId: string; token: string }
   | { type: 'STREAM_START' }
@@ -56,6 +57,7 @@ interface GameStoreState {
   state: GameState;
   previousState: GameState | null;
   mode: GameMode | null;
+  customPrompt: string | null;
   history: Message[];
   currentNarration: string;
   streamBuffer: string;
@@ -74,6 +76,7 @@ const VALID_TRANSITIONS: Record<GameState, Partial<Record<GameEvent['type'], Gam
     RESET: 'uninitialized',
   },
   mode_selection: {
+    SET_CUSTOM_PROMPT: 'mode_selection',
     START_GAME: 'starting',
     RESET: 'uninitialized',
   },
@@ -121,6 +124,7 @@ const initialState: GameStoreState = {
   state: 'uninitialized',
   previousState: null,
   mode: null,
+  customPrompt: null,
   history: [],
   currentNarration: '',
   streamBuffer: '',
@@ -157,6 +161,12 @@ function createGameStore() {
               ...state,
               mode: event.mode,
               state: 'mode_selection',
+            };
+
+          case 'SET_CUSTOM_PROMPT':
+            return {
+              ...state,
+              customPrompt: event.prompt,
             };
 
           case 'START_GAME':

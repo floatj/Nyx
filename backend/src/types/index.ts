@@ -1,6 +1,6 @@
 // Core domain types
 
-export type GameMode = 'dungeon' | 'journey' | 'mystery';
+export type GameMode = 'dungeon' | 'journey' | 'mystery' | 'custom';
 
 export type MessageRole = 'system' | 'assistant' | 'user';
 
@@ -27,6 +27,7 @@ export interface Message {
 export interface PlayRequest {
   sessionId: string;
   mode: GameMode;
+  customPrompt?: string;
   history: Message[];
   player_input: string;
   model?: string;
