@@ -496,6 +496,90 @@ describe('gameStore', () => {
     });
   });
 
+  describe('custom action input', () => {
+    it('should handle custom action input in awaiting_choice state', () => {
+      setupGameAwaitingChoice();
+
+      const customText = 'I search for hidden doors';
+      gameStore.dispatch({ type: 'SELECT_CUSTOM_CHOICE', customText });
+
+      const state = get(gameStore);
+      expect(state.state).toBe('processing_input');
+      expect(state.history).toHaveLength(2); // assistant + user
+      expect(state.history[1].role).toBe('user');
+      expect(state.history[1].content).toBe(customText);
+    });
+
+    it('should handle custom action with trimmed text', () => {
+      setupGameAwaitingChoice();
+
+      const customText = '  I look around carefully  ';
+      gameStore.dispatch({ type: 'SELECT_CUSTOM_CHOICE', customText });
+
+      const state = get(gameStore);
+      expect(state.state).toBe('processing_input');
+      expect(state.history[1].content).toBe(customText);
+    });
+
+    it('should not allow custom action in non-awaiting_choice state', () => {
+      setupGameInStreamingState();
+
+      const initialHistory = get(gameStore).history;
+      gameStore.dispatch({ type: 'SELECT_CUSTOM_CHOICE', customText: 'Try to act' });
+
+      const state = get(gameStore);
+      expect(state.state).toBe('streaming'); // Should remain in streaming
+      expect(state.history).toEqual(initialHistory); // History unchanged
+    });
+
+    it('should handle multiple custom actions in sequence', () => {
+      setupGameAwaitingChoice();
+
+      // First custom action
+      gameStore.dispatch({ type: 'SELECT_CUSTOM_CHOICE', customText: 'First action' });
+      expect(get(gameStore).history[1].content).toBe('First action');
+
+      // Simulate getting to awaiting_choice again
+      gameStore.dispatch({ type: 'STREAM_START' });
+      const output: LLMOutput = {
+        narration: 'Next situation',
+        choices: [{ id: 'option1', label: 'Option 1' }],
+      };
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output });
+
+      // Second custom action
+      gameStore.dispatch({ type: 'SELECT_CUSTOM_CHOICE', customText: 'Second action' });
+
+      const state = get(gameStore);
+      expect(state.history).toHaveLength(4); // 2 assistant + 2 user
+      expect(state.history[3].content).toBe('Second action');
+    });
+
+    it('should work alongside regular choice selection', () => {
+      setupGameAwaitingChoice();
+
+      // First select a regular choice
+      gameStore.dispatch({ type: 'SELECT_CHOICE', choiceId: 'left' });
+      expect(get(gameStore).history[1].content).toBe('Go left');
+
+      // Simulate getting to awaiting_choice again
+      gameStore.dispatch({ type: 'STREAM_START' });
+      const output: LLMOutput = {
+        narration: 'Next situation',
+        choices: [{ id: 'option1', label: 'Option 1' }],
+      };
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output });
+
+      // Now use custom action
+      gameStore.dispatch({ type: 'SELECT_CUSTOM_CHOICE', customText: 'Custom action' });
+
+      const state = get(gameStore);
+      expect(state.history).toHaveLength(4); // 2 assistant + 2 user
+      expect(state.history[1].content).toBe('Go left');
+      expect(state.history[3].content).toBe('Custom action');
+    });
+  });
+
   describe('derived stores', () => {
     it('isLoading should be true during processing states', () => {
       expect(get(isLoading)).toBe(false);
