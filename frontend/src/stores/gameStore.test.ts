@@ -197,6 +197,305 @@ describe('gameStore', () => {
     });
   });
 
+  describe('character status', () => {
+    it('should initialize with null character status', () => {
+      const state = get(gameStore);
+      expect(state.characterStatus).toBeNull();
+    });
+
+    it('should update character status on STREAM_COMPLETE', () => {
+      setupGameInStreamingState();
+
+      const output: LLMOutput = {
+        narration: 'You take damage from the trap!',
+        choices: [
+          { id: 'heal', label: 'Use healing potion' },
+          { id: 'continue', label: 'Press on' },
+        ],
+        characterStatus: {
+          health: 75,
+          stamina: 90,
+          conditions: {
+            injured: true,
+            poisoned: false,
+            blessed: false,
+            cursed: false,
+          },
+          inventory: ['torch', 'rusty dagger'],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output });
+
+      const state = get(gameStore);
+      expect(state.characterStatus).toBeDefined();
+      expect(state.characterStatus?.health).toBe(75);
+      expect(state.characterStatus?.stamina).toBe(90);
+      expect(state.characterStatus?.conditions.injured).toBe(true);
+      expect(state.characterStatus?.inventory).toContain('torch');
+    });
+
+    it('should preserve character status when not provided in response', () => {
+      setupGameInStreamingState();
+
+      // First turn with character status
+      const output1: LLMOutput = {
+        narration: 'You enter the dungeon.',
+        choices: [{ id: 'explore', label: 'Explore' }],
+        characterStatus: {
+          health: 100,
+          stamina: 100,
+          conditions: {
+            injured: false,
+            poisoned: false,
+            blessed: false,
+            cursed: false,
+          },
+          inventory: ['torch'],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output: output1 });
+
+      // Second turn without character status
+      gameStore.dispatch({ type: 'SELECT_CHOICE', choiceId: 'explore' });
+      gameStore.dispatch({ type: 'STREAM_START' });
+
+      const output2: LLMOutput = {
+        narration: 'You continue exploring.',
+        choices: [{ id: 'proceed', label: 'Proceed' }],
+        // No characterStatus field
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output: output2 });
+
+      const state = get(gameStore);
+      // Should preserve previous character status
+      expect(state.characterStatus).toBeDefined();
+      expect(state.characterStatus?.health).toBe(100);
+      expect(state.characterStatus?.inventory).toContain('torch');
+    });
+
+    it('should handle character status with multiple conditions', () => {
+      setupGameInStreamingState();
+
+      const output: LLMOutput = {
+        narration: 'You are cursed and poisoned!',
+        choices: [{ id: 'rest', label: 'Rest' }],
+        characterStatus: {
+          health: 50,
+          stamina: 30,
+          conditions: {
+            injured: true,
+            poisoned: true,
+            blessed: false,
+            cursed: true,
+          },
+          inventory: ['cursed amulet'],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output });
+
+      const state = get(gameStore);
+      expect(state.characterStatus?.conditions.injured).toBe(true);
+      expect(state.characterStatus?.conditions.poisoned).toBe(true);
+      expect(state.characterStatus?.conditions.cursed).toBe(true);
+      expect(state.characterStatus?.conditions.blessed).toBe(false);
+    });
+
+    it('should handle empty inventory', () => {
+      setupGameInStreamingState();
+
+      const output: LLMOutput = {
+        narration: 'You lost all your items!',
+        choices: [{ id: 'continue', label: 'Continue' }],
+        characterStatus: {
+          health: 80,
+          stamina: 60,
+          conditions: {
+            injured: false,
+            poisoned: false,
+            blessed: false,
+            cursed: false,
+          },
+          inventory: [],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output });
+
+      const state = get(gameStore);
+      expect(state.characterStatus?.inventory).toEqual([]);
+    });
+
+    it('should reset character status on game reset', () => {
+      setupGameInStreamingState();
+
+      const output: LLMOutput = {
+        narration: 'You find treasure!',
+        choices: [{ id: 'take', label: 'Take it' }],
+        characterStatus: {
+          health: 80,
+          stamina: 70,
+          conditions: {
+            injured: false,
+            poisoned: false,
+            blessed: false,
+            cursed: false,
+          },
+          inventory: ['treasure'],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output });
+      expect(get(gameStore).characterStatus).toBeDefined();
+
+      gameStore.dispatch({ type: 'RESET' });
+
+      const state = get(gameStore);
+      expect(state.characterStatus).toBeNull();
+    });
+  });
+
+  describe('characterStatusEnabled flag', () => {
+    it('should initialize with characterStatusEnabled true by default', () => {
+      const state = get(gameStore);
+      expect(state.characterStatusEnabled).toBe(true);
+    });
+
+    it('should set characterStatusEnabled flag with SET_CHARACTER_STATUS_ENABLED event', () => {
+      gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: false });
+
+      let state = get(gameStore);
+      expect(state.characterStatusEnabled).toBe(false);
+
+      gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: true });
+
+      state = get(gameStore);
+      expect(state.characterStatusEnabled).toBe(true);
+    });
+
+    it('should update character status when characterStatusEnabled is true', () => {
+      gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: true });
+      setupGameInStreamingState();
+
+      const output: LLMOutput = {
+        narration: 'You take damage!',
+        choices: [{ id: 'heal', label: 'Heal' }],
+        characterStatus: {
+          health: 75,
+          stamina: 90,
+          conditions: {
+            injured: true,
+            poisoned: false,
+            blessed: false,
+            cursed: false,
+          },
+          inventory: ['torch'],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output });
+
+      const state = get(gameStore);
+      expect(state.characterStatus).toBeDefined();
+      expect(state.characterStatus?.health).toBe(75);
+      expect(state.characterStatus?.stamina).toBe(90);
+    });
+
+    it('should NOT update character status when characterStatusEnabled is false', () => {
+      gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: false });
+      setupGameInStreamingState();
+
+      const output: LLMOutput = {
+        narration: 'You take damage!',
+        choices: [{ id: 'heal', label: 'Heal' }],
+        characterStatus: {
+          health: 75,
+          stamina: 90,
+          conditions: {
+            injured: true,
+            poisoned: false,
+            blessed: false,
+            cursed: false,
+          },
+          inventory: ['torch'],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output });
+
+      const state = get(gameStore);
+      // Character status should remain null even though LLM returned it
+      expect(state.characterStatus).toBeNull();
+    });
+
+    it('should keep character status null across multiple turns when disabled', () => {
+      gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: false });
+      setupGameInStreamingState();
+
+      // First turn with character status in response
+      const output1: LLMOutput = {
+        narration: 'Turn 1',
+        choices: [{ id: 'next', label: 'Next' }],
+        characterStatus: {
+          health: 100,
+          stamina: 100,
+          conditions: { injured: false, poisoned: false, blessed: false, cursed: false },
+          inventory: ['torch'],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output: output1 });
+      expect(get(gameStore).characterStatus).toBeNull();
+
+      // Second turn
+      gameStore.dispatch({ type: 'SELECT_CHOICE', choiceId: 'next' });
+      gameStore.dispatch({ type: 'STREAM_START' });
+
+      const output2: LLMOutput = {
+        narration: 'Turn 2',
+        choices: [{ id: 'continue', label: 'Continue' }],
+        characterStatus: {
+          health: 80,
+          stamina: 70,
+          conditions: { injured: true, poisoned: false, blessed: false, cursed: false },
+          inventory: ['torch', 'sword'],
+        },
+      };
+
+      gameStore.dispatch({ type: 'STREAM_COMPLETE', output: output2 });
+
+      // Should still be null
+      const state = get(gameStore);
+      expect(state.characterStatus).toBeNull();
+    });
+
+    it('should allow toggling characterStatusEnabled during mode_selection', () => {
+      gameStore.dispatch({ type: 'SELECT_MODE', mode: 'dungeon' });
+      expect(get(gameStore).state).toBe('mode_selection');
+
+      gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: false });
+
+      const state = get(gameStore);
+      expect(state.state).toBe('mode_selection');
+      expect(state.characterStatusEnabled).toBe(false);
+    });
+
+    it('should preserve characterStatusEnabled value through game reset', () => {
+      gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: false });
+      setupGameAwaitingChoice();
+
+      gameStore.dispatch({ type: 'RESET' });
+
+      const state = get(gameStore);
+      expect(state.state).toBe('uninitialized');
+      // characterStatusEnabled should be reset to default (true)
+      expect(state.characterStatusEnabled).toBe(true);
+    });
+  });
+
   describe('derived stores', () => {
     it('isLoading should be true during processing states', () => {
       expect(get(isLoading)).toBe(false);

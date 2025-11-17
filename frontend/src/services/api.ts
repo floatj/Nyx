@@ -18,6 +18,7 @@ export interface PlayRequest {
   model?: string;
   temperature?: number;
   max_tokens?: number;
+  characterStatusEnabled?: boolean;
 }
 
 export class ApiService {

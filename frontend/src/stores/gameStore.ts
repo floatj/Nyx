@@ -21,9 +21,22 @@ export interface Choice {
   label: string;
 }
 
+export interface CharacterStatus {
+  health: number;
+  stamina: number;
+  conditions: {
+    injured: boolean;
+    poisoned: boolean;
+    blessed: boolean;
+    cursed: boolean;
+  };
+  inventory: string[];
+}
+
 export interface LLMOutput {
   narration: string;
   choices: Choice[];
+  characterStatus?: CharacterStatus;
   meta?: {
     danger?: number;
     loot?: boolean;
@@ -39,6 +52,7 @@ export interface Message {
 export type GameEvent =
   | { type: 'SELECT_MODE'; mode: GameMode }
   | { type: 'SET_CUSTOM_PROMPT'; prompt: string }
+  | { type: 'SET_CHARACTER_STATUS_ENABLED'; enabled: boolean }
   | { type: 'START_GAME' }
   | { type: 'SESSION_READY'; sessionId: string; token: string }
   | { type: 'STREAM_START' }
@@ -66,17 +80,21 @@ interface GameStoreState {
   sessionId: string | null;
   sessionToken: string | null;
   tokenUsed: number;
+  characterStatus: CharacterStatus | null;
+  characterStatusEnabled: boolean;
 }
 
 // Valid state transitions
 const VALID_TRANSITIONS: Record<GameState, Partial<Record<GameEvent['type'], GameState>>> = {
   uninitialized: {
     SELECT_MODE: 'mode_selection',
+    SET_CHARACTER_STATUS_ENABLED: 'uninitialized',
     ERROR: 'error_recoverable',
     RESET: 'uninitialized',
   },
   mode_selection: {
     SET_CUSTOM_PROMPT: 'mode_selection',
+    SET_CHARACTER_STATUS_ENABLED: 'mode_selection',
     START_GAME: 'starting',
     RESET: 'uninitialized',
   },
@@ -133,6 +151,8 @@ const initialState: GameStoreState = {
   sessionId: null,
   sessionToken: null,
   tokenUsed: 0,
+  characterStatus: null,
+  characterStatusEnabled: true, // Default to enabled
 };
 
 function createGameStore() {
@@ -167,6 +187,12 @@ function createGameStore() {
             return {
               ...state,
               customPrompt: event.prompt,
+            };
+
+          case 'SET_CHARACTER_STATUS_ENABLED':
+            return {
+              ...state,
+              characterStatusEnabled: event.enabled,
             };
 
           case 'START_GAME':
@@ -210,6 +236,11 @@ function createGameStore() {
               },
             ];
 
+            // Only update character status if it's enabled
+            const newCharacterStatus = state.characterStatusEnabled
+              ? (event.output.characterStatus || state.characterStatus)
+              : null;
+
             return {
               ...state,
               currentNarration: event.output.narration,
@@ -217,6 +248,7 @@ function createGameStore() {
               history: newHistory,
               streamBuffer: '',
               tokenUsed: event.tokenUsed !== undefined ? event.tokenUsed : state.tokenUsed,
+              characterStatus: newCharacterStatus,
               state: event.output.meta?.ending ? 'game_over' : 'awaiting_choice',
             };
           }

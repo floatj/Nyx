@@ -9,9 +9,22 @@ export interface Choice {
   label: string;
 }
 
+export interface CharacterStatus {
+  health: number;
+  stamina: number;
+  conditions: {
+    injured: boolean;
+    poisoned: boolean;
+    blessed: boolean;
+    cursed: boolean;
+  };
+  inventory: string[];
+}
+
 export interface LLMOutput {
   narration: string;
   choices: Choice[];
+  characterStatus?: CharacterStatus;
   meta?: {
     danger?: number;
     loot?: boolean;
@@ -33,6 +46,7 @@ export interface PlayRequest {
   model?: string;
   temperature?: number;
   max_tokens?: number;
+  characterStatusEnabled?: boolean;
 }
 
 export interface Session {

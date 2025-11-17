@@ -4,20 +4,26 @@
   import { settingsStore } from '../stores/settingsStore';
   import { apiService } from '../services/api';
   import SaveSlotModal from '../components/SaveSlotModal.svelte';
+  import GameSettingsModal from '../components/GameSettingsModal.svelte';
   import StoryPane from '../components/StoryPane.svelte';
   import BossModePane from '../components/BossModePane.svelte';
   import ChoiceList from '../components/ChoiceList.svelte';
   import TokenMeter from '../components/TokenMeter.svelte';
   import Settings from './Settings.svelte';
+  import CharacterSheet from '../components/CharacterSheet.svelte';
   import type { GameMode } from '../stores/gameStore';
   import type { SaveSlot } from '../services/storage';
+  import { settingsService } from '../services/settings';
 
   let tokenBudget = 20000;
   let selectedMode: GameMode | null = null;
   let showSaveModal = false;
   let saveModalMode: 'save' | 'load' = 'save';
+  let showGameSettingsModal = false;
+  let pendingGameMode: GameMode | null = null;
   let showCustomPromptModal = false;
   let customPromptText = '';
+  let customCharacterStatusEnabled = settingsService.isCharacterStatusEnabled();
   let fileInput: HTMLInputElement;
   let isGeneratingPrompt = false;
   let isOptimizingPrompt = false;
@@ -46,7 +52,20 @@
     }
   }
 
-  async function startGame(mode: GameMode) {
+  function showGameSettings(mode: GameMode) {
+    pendingGameMode = mode;
+    showGameSettingsModal = true;
+  }
+
+  function confirmGameSettings(characterStatusEnabled: boolean) {
+    if (pendingGameMode) {
+      gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: characterStatusEnabled });
+      startGameWithSettings(pendingGameMode);
+      pendingGameMode = null;
+    }
+  }
+
+  async function startGameWithSettings(mode: GameMode) {
     try {
       selectedMode = mode;
       gameStore.dispatch({ type: 'SELECT_MODE', mode });
@@ -86,6 +105,7 @@
         customPrompt: $gameStore.customPrompt || undefined,
         history: $gameStore.history,
         player_input: $gameStore.history.length > 0 ? ($gameStore.history[$gameStore.history.length - 1].content as string) : '',
+        characterStatusEnabled: $gameStore.characterStatusEnabled,
       };
 
       for await (const event of apiService.playTurn(playRequest)) {
@@ -154,6 +174,7 @@
           currentNarration: data.currentNarration,
           choices: data.choices,
           tokenUsed: data.tokenUsed,
+          characterStatus: data.characterStatus || null,
           state: 'awaiting_choice',
         });
       }
@@ -166,6 +187,7 @@
   function openCustomPromptModal() {
     showCustomPromptModal = true;
     customPromptText = '';
+    customCharacterStatusEnabled = settingsService.isCharacterStatusEnabled();
   }
 
   function handleFileUpload(event: Event) {
@@ -218,10 +240,14 @@
       return;
     }
 
+    // Save the character status setting
+    settingsService.setCharacterStatusEnabled(customCharacterStatusEnabled);
+
     gameStore.dispatch({ type: 'SELECT_MODE', mode: 'custom' });
     gameStore.dispatch({ type: 'SET_CUSTOM_PROMPT', prompt: customPromptText });
+    gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: customCharacterStatusEnabled });
     showCustomPromptModal = false;
-    startGame('custom');
+    startGameWithSettings('custom');
   }
 
   function navigateToSettings() {
@@ -276,7 +302,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <button
             class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
-            on:click={() => startGame('dungeon')}
+            on:click={() => showGameSettings('dungeon')}
           >
             <div class="text-4xl mb-3">🏰</div>
             <h3 class="text-xl font-bold mb-2">Dungeon Crawl</h3>
@@ -287,7 +313,7 @@
 
           <button
             class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
-            on:click={() => startGame('journey')}
+            on:click={() => showGameSettings('journey')}
           >
             <div class="text-4xl mb-3">⚔️</div>
             <h3 class="text-xl font-bold mb-2">Hero's Journey</h3>
@@ -298,7 +324,7 @@
 
           <button
             class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
-            on:click={() => startGame('mystery')}
+            on:click={() => showGameSettings('mystery')}
           >
             <div class="text-4xl mb-3">🔍</div>
             <h3 class="text-xl font-bold mb-2">Mystery Night</h3>
@@ -334,12 +360,34 @@
       {#if $settingsStore.isBossMode}
         <BossModePane />
       {:else}
-        <StoryPane />
-      {/if}
-      {#if !$settingsStore.isBossMode}
-        <ChoiceList />
+        <div class="max-w-screen-xl mx-auto px-4">
+        {#if $gameStore.characterStatusEnabled}
+          <!-- Layout with Character Sheet -->
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Left Sidebar: Character Sheet -->
+            <div class="lg:col-span-1">
+              <div class="sticky top-20">
+                <CharacterSheet status={$gameStore.characterStatus} />
+              </div>
+            </div>
+
+            <!-- Main Content: Story and Choices -->
+            <div class="lg:col-span-3">
+              <StoryPane />
+              <ChoiceList />
+            </div>
+          </div>
+        {:else}
+          <!-- Layout without Character Sheet -->
+          <div class="max-w-screen-md mx-auto">
+            <StoryPane />
+            <ChoiceList />
+          </div>
+        {/if}
+      </div>
       {/if}
 
+      <!-- Error Handling -->
       {#if $hasError && !$settingsStore.isBossMode}
         <div class="max-w-screen-md mx-auto px-4 mt-4">
           <div class="bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-500 rounded-lg p-4">
@@ -358,6 +406,7 @@
         </div>
       {/if}
 
+      <!-- Game Over -->
       {#if $isGameOver && !$settingsStore.isBossMode}
         <div class="max-w-screen-md mx-auto px-4 mt-4">
           <div class="bg-indigo-100 dark:bg-indigo-900/50 border border-indigo-400 dark:border-indigo-500 rounded-lg p-6 text-center">
@@ -406,6 +455,16 @@
     onLoad={handleLoadGame}
   />
 
+  <!-- Game Settings Modal -->
+  {#if pendingGameMode}
+    <GameSettingsModal
+      isOpen={showGameSettingsModal}
+      mode={pendingGameMode}
+      onClose={() => (showGameSettingsModal = false)}
+      onConfirm={confirmGameSettings}
+    />
+  {/if}
+
   <!-- Custom Prompt Modal -->
   {#if showCustomPromptModal}
     <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -453,6 +512,25 @@
               ✨ Optimize Your Prompt
             {/if}
           </button>
+        </div>
+
+        <!-- Character Status Toggle -->
+        <div class="mb-4 bg-gray-700 rounded-lg p-4">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              bind:checked={customCharacterStatusEnabled}
+              disabled={isGeneratingPrompt || isOptimizingPrompt}
+              class="mt-1 w-5 h-5 rounded border-gray-600 bg-gray-600 text-indigo-600 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            <div class="flex-1">
+              <div class="font-medium text-gray-100">Enable Character Status Tracking</div>
+              <p class="text-sm text-gray-400 mt-1">
+                Track health, stamina, conditions, and inventory throughout your adventure. This
+                adds RPG-style mechanics to your story.
+              </p>
+            </div>
+          </label>
         </div>
 
         <div class="mb-6">

@@ -28,7 +28,12 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Estimate token cost and check budget
-    const systemPrompt = promptService.buildSystemPrompt(playRequest.mode, playRequest.customPrompt);
+    const characterStatusEnabled = playRequest.characterStatusEnabled !== false; // Default to true if not specified
+    const systemPrompt = promptService.buildSystemPrompt(
+      playRequest.mode,
+      playRequest.customPrompt,
+      characterStatusEnabled
+    );
     const messages = await historyManager.prepareMessages(
       systemPrompt,
       playRequest.history,
@@ -60,7 +65,7 @@ router.post('/', async (req: Request, res: Response) => {
       // First turn - add initial prompt
       messages.push({
         role: 'user',
-        content: promptService.buildInitialPrompt(playRequest.mode, playRequest.customPrompt),
+        content: promptService.buildInitialPrompt(playRequest.mode, playRequest.customPrompt, characterStatusEnabled),
       });
     }
 
