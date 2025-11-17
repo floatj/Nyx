@@ -23,11 +23,8 @@
   let isOptimizingPrompt = false;
   let currentPage: 'home' | 'settings' = 'home';
 
-  // Initialize settings on mount
+  // Boss key listener
   onMount(() => {
-    settingsStore.init();
-
-    // Boss key listener (Ctrl + /)
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === '/' && $settingsStore.bossKeyEnabled) {
         e.preventDefault();
