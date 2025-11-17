@@ -33,15 +33,18 @@ export class HistoryManager {
   ): Promise<Message[]> {
     const turnCount = this.countTurns(fullHistory);
 
+    // Convert all messages to API-compatible format (content must be string)
+    const normalizedHistory = this.normalizeMessages(fullHistory);
+
     // Early return if history is short
     if (turnCount <= this.config.recentTurnLimit) {
-      return [{ role: 'system', content: systemPrompt }, ...fullHistory];
+      return [{ role: 'system', content: systemPrompt }, ...normalizedHistory];
     }
 
     // Split history
-    const splitPoint = fullHistory.length - this.config.recentTurnLimit * 2;
-    const olderHistory = fullHistory.slice(0, splitPoint);
-    const recentHistory = fullHistory.slice(splitPoint);
+    const splitPoint = normalizedHistory.length - this.config.recentTurnLimit * 2;
+    const olderHistory = normalizedHistory.slice(0, splitPoint);
+    const recentHistory = normalizedHistory.slice(splitPoint);
 
     // Strategy A: Simple truncation (fast, loses context)
     if (!this.config.enableSummarization) {
@@ -56,6 +59,18 @@ export class HistoryManager {
       { role: 'system', content: `Story so far: ${summary}` },
       ...recentHistory,
     ];
+  }
+
+  /**
+   * Normalize messages to have string content only (required by OpenRouter API)
+   */
+  private normalizeMessages(messages: Message[]): Message[] {
+    return messages.map((msg) => ({
+      role: msg.role,
+      content: typeof msg.content === 'string'
+        ? msg.content
+        : (msg.content as LLMOutput).narration || JSON.stringify(msg.content),
+    }));
   }
 
   /**
