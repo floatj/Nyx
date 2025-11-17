@@ -16,18 +16,22 @@ function loadSettings(): SettingsState {
 
   try {
     const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    console.log('[SettingsStore] Loading from localStorage:', stored);
     if (stored) {
       const parsed = JSON.parse(stored);
-      return {
+      const settings = {
         darkMode: parsed.darkMode ?? true,
         bossKeyEnabled: parsed.bossKeyEnabled ?? false,
         isBossMode: false, // Always start with boss mode off
       };
+      console.log('[SettingsStore] Loaded settings:', settings);
+      return settings;
     }
   } catch (error) {
     console.error('Failed to load settings:', error);
   }
 
+  console.log('[SettingsStore] Using default settings');
   return { darkMode: true, bossKeyEnabled: false, isBossMode: false };
 }
 
@@ -103,9 +107,11 @@ function createSettingsStore() {
     },
 
     init: () => {
+      console.log('[SettingsStore] Initializing...');
       const settings = loadSettings();
       set(settings);
       applyDarkMode(settings.darkMode);
+      console.log('[SettingsStore] Initialization complete');
     },
   };
 }
@@ -114,11 +120,16 @@ function createSettingsStore() {
 function applyDarkMode(enabled: boolean): void {
   if (typeof window === 'undefined') return;
 
+  console.log('[SettingsStore] Applying dark mode:', enabled);
+  console.log('[SettingsStore] Document classes before:', document.documentElement.className);
+
   if (enabled) {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
   }
+
+  console.log('[SettingsStore] Document classes after:', document.documentElement.className);
 }
 
 export const settingsStore = createSettingsStore();
