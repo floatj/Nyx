@@ -47,8 +47,11 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
-    // Add user input to messages
-    if (playRequest.player_input) {
+    // Add user input to messages only if last message is not already a user message
+    const lastMsg = messages[messages.length - 1];
+    const lastIsUser = lastMsg?.role === 'user';
+
+    if (playRequest.player_input && !lastIsUser) {
       messages.push({
         role: 'user',
         content: playRequest.player_input,

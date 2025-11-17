@@ -16,6 +16,8 @@
   let showCustomPromptModal = false;
   let customPromptText = '';
   let fileInput: HTMLInputElement;
+  let isGeneratingPrompt = false;
+  let isOptimizingPrompt = false;
 
   // Watch for choice selection to trigger next turn
   $: {
@@ -157,6 +159,37 @@
       customPromptText = content;
     };
     reader.readAsText(file);
+  }
+
+  async function generateRandomPrompt() {
+    try {
+      isGeneratingPrompt = true;
+      const prompt = await apiService.generatePrompt();
+      customPromptText = prompt;
+    } catch (error) {
+      console.error('Failed to generate prompt:', error);
+      alert('Failed to generate prompt. Please try again.');
+    } finally {
+      isGeneratingPrompt = false;
+    }
+  }
+
+  async function optimizePrompt() {
+    if (!customPromptText.trim()) {
+      alert('Please enter a prompt first');
+      return;
+    }
+
+    try {
+      isOptimizingPrompt = true;
+      const optimized = await apiService.optimizePrompt(customPromptText);
+      customPromptText = optimized;
+    } catch (error) {
+      console.error('Failed to optimize prompt:', error);
+      alert('Failed to optimize prompt. Please try again.');
+    } finally {
+      isOptimizingPrompt = false;
+    }
   }
 
   function startCustomGame() {
@@ -338,7 +371,36 @@
             bind:value={customPromptText}
             class="w-full h-48 bg-gray-700 text-gray-100 rounded-lg p-3 border border-gray-600 focus:border-purple-500 focus:outline-none resize-none"
             placeholder="Example: You are a space explorer who has just discovered an ancient alien artifact on a remote planet. The artifact begins to glow as you approach it..."
+            disabled={isGeneratingPrompt || isOptimizingPrompt}
           ></textarea>
+        </div>
+
+        <!-- Prompt Generation Buttons -->
+        <div class="mb-4 flex gap-3">
+          <button
+            class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+            on:click={generateRandomPrompt}
+            disabled={isGeneratingPrompt || isOptimizingPrompt}
+          >
+            {#if isGeneratingPrompt}
+              <span class="inline-block animate-spin">⏳</span>
+              Generating...
+            {:else}
+              🎲 Generate Random Prompt
+            {/if}
+          </button>
+          <button
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+            on:click={optimizePrompt}
+            disabled={isGeneratingPrompt || isOptimizingPrompt || !customPromptText.trim()}
+          >
+            {#if isOptimizingPrompt}
+              <span class="inline-block animate-spin">⏳</span>
+              Optimizing...
+            {:else}
+              ✨ Optimize Your Prompt
+            {/if}
+          </button>
         </div>
 
         <div class="mb-6">
@@ -350,20 +412,23 @@
             accept=".txt,.md,.markdown"
             bind:this={fileInput}
             on:change={handleFileUpload}
-            class="w-full bg-gray-700 text-gray-100 rounded-lg p-2 border border-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white hover:file:bg-purple-700 file:cursor-pointer"
+            disabled={isGeneratingPrompt || isOptimizingPrompt}
+            class="w-full bg-gray-700 text-gray-100 rounded-lg p-2 border border-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white hover:file:bg-purple-700 file:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
 
         <div class="flex gap-3 justify-end">
           <button
-            class="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
+            class="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             on:click={() => (showCustomPromptModal = false)}
+            disabled={isGeneratingPrompt || isOptimizingPrompt}
           >
             Cancel
           </button>
           <button
-            class="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors font-medium"
+            class="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             on:click={startCustomGame}
+            disabled={isGeneratingPrompt || isOptimizingPrompt}
           >
             Start Adventure
           </button>
