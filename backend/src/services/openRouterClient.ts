@@ -67,6 +67,7 @@ export class OpenRouterClient {
         temperature: params.temperature ?? 0.7,
         max_tokens: params.max_tokens ?? 600,
         stream: true,
+        response_format: { type: 'json_object' }, // Force JSON output
       }),
     });
 
@@ -140,6 +141,7 @@ export class OpenRouterClient {
         temperature: params.temperature ?? 0.7,
         max_tokens: params.max_tokens ?? 600,
         stream: false,
+        response_format: { type: 'json_object' }, // Force JSON output
       }),
     });
 

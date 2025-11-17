@@ -1,20 +1,26 @@
 import type { GameMode } from '../types/index.js';
 
-const BASE_SYSTEM_PROMPT = `You are a text RPG engine. Output STRICT JSON only with keys: narration, choices[], meta.
-Each choice must be concise (<= 9 words) and mutually exclusive. Avoid spoilers.
-Tone: adventurous, vivid, PG-13 by default. Keep paragraphs <= 4 sentences.
-If user enters free text, interpret and map to the closest choice or create relevant options.
+const BASE_SYSTEM_PROMPT = `You are a text RPG engine. You MUST output ONLY valid JSON, nothing else.
 
-CRITICAL: Always output valid JSON in this exact format:
+CRITICAL REQUIREMENTS:
+1. Output ONLY the JSON object, no explanations or markdown
+2. ALWAYS provide 2-4 meaningful choices per turn
+3. Each choice must be unique and lead to different outcomes
+4. Keep narration to 2-4 sentences maximum
+5. Each choice label must be <= 9 words
+
+EXACT FORMAT (copy this structure):
 {
   "narration": "Your vivid second-person narration here.",
   "choices": [
-    {"id": "unique_id_1", "label": "Short action description"},
-    {"id": "unique_id_2", "label": "Alternative action"},
-    {"id": "unique_id_3", "label": "Another option"}
+    {"id": "option1", "label": "First meaningful action"},
+    {"id": "option2", "label": "Second different action"},
+    {"id": "option3", "label": "Third alternative action"}
   ],
   "meta": {"danger": 0.0, "loot": false, "ending": false}
-}`;
+}
+
+IMPORTANT: Do NOT wrap in markdown code blocks. Output the raw JSON only.`;
 
 const MODE_LORE: Record<GameMode, string> = {
   dungeon: `SETTING: Gritty fantasy catacombs beneath an ancient castle
@@ -86,16 +92,25 @@ ${SAFETY_ADDENDUM}`;
    * Extract JSON from LLM response, handling various formats
    */
   parseModelOutput(text: string): { narration: string; choices: any[]; meta?: any } {
+    // Log raw output for debugging
+    console.log('=== RAW LLM OUTPUT ===');
+    console.log(text.substring(0, 500)); // First 500 chars
+    console.log('=== END RAW OUTPUT ===');
+
     // Try direct parse
     try {
-      return JSON.parse(text);
+      const parsed = JSON.parse(text);
+      console.log(`✅ Direct JSON parse successful. Choices: ${parsed.choices?.length || 0}`);
+      return parsed;
     } catch {}
 
     // Try extracting from markdown code block
     const codeBlockMatch = text.match(/```json?\s*(\{[\s\S]*?\})\s*```/);
     if (codeBlockMatch) {
       try {
-        return JSON.parse(codeBlockMatch[1]);
+        const parsed = JSON.parse(codeBlockMatch[1]);
+        console.log(`✅ Markdown block parse successful. Choices: ${parsed.choices?.length || 0}`);
+        return parsed;
       } catch {}
     }
 
@@ -103,12 +118,15 @@ ${SAFETY_ADDENDUM}`;
     const jsonMatch = text.match(/\{[\s\S]*"narration"[\s\S]*\}/);
     if (jsonMatch) {
       try {
-        return JSON.parse(jsonMatch[0]);
+        const parsed = JSON.parse(jsonMatch[0]);
+        console.log(`✅ Regex extraction successful. Choices: ${parsed.choices?.length || 0}`);
+        return parsed;
       } catch {}
     }
 
     // Fallback: treat as plain text
-    console.warn('Failed to parse JSON from model output, using fallback');
+    console.warn('❌ Failed to parse JSON from model output, using fallback');
+    console.warn('Text length:', text.length);
     return {
       narration: text,
       choices: [{ id: 'continue', label: 'Continue' }],
