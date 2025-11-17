@@ -12,6 +12,7 @@ export interface SessionResponse {
 export interface PlayRequest {
   sessionId: string;
   mode: GameMode;
+  customPrompt?: string;
   history: Message[];
   player_input: string;
   model?: string;
