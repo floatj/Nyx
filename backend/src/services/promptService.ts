@@ -6,8 +6,9 @@ CRITICAL REQUIREMENTS:
 1. Output ONLY the JSON object, no explanations or markdown
 2. ALWAYS provide 2-4 meaningful choices per turn
 3. Each choice must be unique and lead to different outcomes
-4. Keep narration to 2-4 sentences maximum
-5. Each choice label must be <= 9 words
+4. For normal turns, keep narration to 8-12 sentences.
+5. For the opening scene (first turn), you MAY use up to 12-24 sentences.
+5. Each choice label must be <= 15 words
 
 EXACT FORMAT (copy this structure):
 {
