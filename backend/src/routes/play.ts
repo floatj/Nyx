@@ -66,7 +66,12 @@ router.post('/', async (req: Request, res: Response) => {
       // First turn - add initial prompt
       messages.push({
         role: 'user',
-        content: promptService.buildInitialPrompt(playRequest.mode, playRequest.customPrompt, characterStatusEnabled),
+        content: promptService.buildInitialPrompt(
+          playRequest.mode,
+          playRequest.customPrompt,
+          characterStatusEnabled,
+          playRequest.customInitialCharacterStatus
+        ),
       });
     }
 

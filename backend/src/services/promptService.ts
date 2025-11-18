@@ -175,9 +175,16 @@ ${modeLore}
 ${SAFETY_ADDENDUM}`;
   }
 
-  buildInitialPrompt(mode: GameMode, customPrompt?: string, characterStatusEnabled: boolean = true): string {
+  buildInitialPrompt(
+    mode: GameMode,
+    customPrompt?: string,
+    characterStatusEnabled: boolean = true,
+    customInitialCharacterStatus?: CharacterStatus
+  ): string {
+    // Use custom character status if provided, otherwise use mode defaults
+    const initialStatus = customInitialCharacterStatus || getInitialCharacterStatus(mode);
     const statusContext = characterStatusEnabled
-      ? ` Starting character status: ${JSON.stringify(getInitialCharacterStatus(mode))}`
+      ? ` Starting character status: ${JSON.stringify(initialStatus)}`
       : '';
 
     if (mode === 'custom' && customPrompt) {

@@ -53,6 +53,7 @@ export type GameEvent =
   | { type: 'SELECT_MODE'; mode: GameMode }
   | { type: 'SET_CUSTOM_PROMPT'; prompt: string }
   | { type: 'SET_CHARACTER_STATUS_ENABLED'; enabled: boolean }
+  | { type: 'SET_CUSTOM_CHARACTER_STATUS'; status: CharacterStatus }
   | { type: 'START_GAME' }
   | { type: 'SESSION_READY'; sessionId: string; token: string }
   | { type: 'STREAM_START' }
@@ -73,6 +74,7 @@ interface GameStoreState {
   previousState: GameState | null;
   mode: GameMode | null;
   customPrompt: string | null;
+  customInitialCharacterStatus: CharacterStatus | null;
   history: Message[];
   currentNarration: string;
   streamBuffer: string;
@@ -96,6 +98,7 @@ const VALID_TRANSITIONS: Record<GameState, Partial<Record<GameEvent['type'], Gam
   mode_selection: {
     SET_CUSTOM_PROMPT: 'mode_selection',
     SET_CHARACTER_STATUS_ENABLED: 'mode_selection',
+    SET_CUSTOM_CHARACTER_STATUS: 'mode_selection',
     START_GAME: 'starting',
     RESET: 'uninitialized',
   },
@@ -145,6 +148,7 @@ const initialState: GameStoreState = {
   previousState: null,
   mode: null,
   customPrompt: null,
+  customInitialCharacterStatus: null,
   history: [],
   currentNarration: '',
   streamBuffer: '',
@@ -195,6 +199,13 @@ function createGameStore() {
             return {
               ...state,
               characterStatusEnabled: event.enabled,
+            };
+
+          case 'SET_CUSTOM_CHARACTER_STATUS':
+            return {
+              ...state,
+              customInitialCharacterStatus: event.status,
+              characterStatus: event.status, // Also set as current status
             };
 
           case 'START_GAME':

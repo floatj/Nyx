@@ -24,6 +24,19 @@
   let showCustomPromptModal = false;
   let customPromptText = '';
   let customCharacterStatusEnabled = settingsService.isCharacterStatusEnabled();
+  let customCharacterStatus = {
+    health: 100,
+    stamina: 100,
+    conditions: {
+      injured: false,
+      poisoned: false,
+      blessed: false,
+      cursed: false,
+    },
+    inventory: [] as string[],
+  };
+  let newInventoryItem = '';
+  let showCustomStatusEditor = false;
   let fileInput: HTMLInputElement;
   let isGeneratingPrompt = false;
   let isOptimizingPrompt = false;
@@ -103,6 +116,7 @@
         sessionId: $gameStore.sessionId,
         mode: $gameStore.mode,
         customPrompt: $gameStore.customPrompt || undefined,
+        customInitialCharacterStatus: $gameStore.customInitialCharacterStatus || undefined,
         history: $gameStore.history,
         player_input: $gameStore.history.length > 0 ? ($gameStore.history[$gameStore.history.length - 1].content as string) : '',
         characterStatusEnabled: $gameStore.characterStatusEnabled,
@@ -175,6 +189,7 @@
           choices: data.choices,
           tokenUsed: data.tokenUsed,
           characterStatus: data.characterStatus || null,
+          customInitialCharacterStatus: data.customInitialCharacterStatus || null,
           state: 'awaiting_choice',
         });
       }
@@ -188,6 +203,31 @@
     showCustomPromptModal = true;
     customPromptText = '';
     customCharacterStatusEnabled = settingsService.isCharacterStatusEnabled();
+    // Reset custom character status to defaults
+    customCharacterStatus = {
+      health: 100,
+      stamina: 100,
+      conditions: {
+        injured: false,
+        poisoned: false,
+        blessed: false,
+        cursed: false,
+      },
+      inventory: [],
+    };
+    newInventoryItem = '';
+    showCustomStatusEditor = false;
+  }
+
+  function addInventoryItem() {
+    if (newInventoryItem.trim() && customCharacterStatus.inventory.length < 20) {
+      customCharacterStatus.inventory = [...customCharacterStatus.inventory, newInventoryItem.trim()];
+      newInventoryItem = '';
+    }
+  }
+
+  function removeInventoryItem(index: number) {
+    customCharacterStatus.inventory = customCharacterStatus.inventory.filter((_, i) => i !== index);
   }
 
   function handleFileUpload(event: Event) {
@@ -246,6 +286,15 @@
     gameStore.dispatch({ type: 'SELECT_MODE', mode: 'custom' });
     gameStore.dispatch({ type: 'SET_CUSTOM_PROMPT', prompt: customPromptText });
     gameStore.dispatch({ type: 'SET_CHARACTER_STATUS_ENABLED', enabled: customCharacterStatusEnabled });
+
+    // Set custom character status if enabled
+    if (customCharacterStatusEnabled) {
+      gameStore.dispatch({
+        type: 'SET_CUSTOM_CHARACTER_STATUS',
+        status: customCharacterStatus
+      });
+    }
+
     showCustomPromptModal = false;
     startGameWithSettings('custom');
   }
@@ -543,6 +592,133 @@
               </p>
             </div>
           </label>
+
+          {#if customCharacterStatusEnabled}
+            <div class="mt-4 pt-4 border-t border-gray-600">
+              <button
+                class="w-full flex items-center justify-between text-gray-200 hover:text-white transition-colors mb-3"
+                on:click={() => showCustomStatusEditor = !showCustomStatusEditor}
+              >
+                <span class="font-medium">⚙️ Customize Initial Character Status</span>
+                <span class="text-xl">{showCustomStatusEditor ? '▼' : '▶'}</span>
+              </button>
+
+              {#if showCustomStatusEditor}
+                <div class="space-y-4 bg-gray-800 rounded-lg p-4">
+                  <!-- Health & Stamina -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm text-gray-300 mb-2">
+                        Health: {customCharacterStatus.health}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        bind:value={customCharacterStatus.health}
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-sm text-gray-300 mb-2">
+                        Stamina: {customCharacterStatus.stamina}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        bind:value={customCharacterStatus.stamina}
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Conditions -->
+                  <div>
+                    <label class="block text-sm text-gray-300 mb-2">Starting Conditions</label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          bind:checked={customCharacterStatus.conditions.injured}
+                          class="w-4 h-4 rounded border-gray-600 bg-gray-600 text-red-600"
+                        />
+                        <span>🩹 Injured</span>
+                      </label>
+                      <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          bind:checked={customCharacterStatus.conditions.poisoned}
+                          class="w-4 h-4 rounded border-gray-600 bg-gray-600 text-green-600"
+                        />
+                        <span>☠️ Poisoned</span>
+                      </label>
+                      <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          bind:checked={customCharacterStatus.conditions.blessed}
+                          class="w-4 h-4 rounded border-gray-600 bg-gray-600 text-yellow-600"
+                        />
+                        <span>✨ Blessed</span>
+                      </label>
+                      <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          bind:checked={customCharacterStatus.conditions.cursed}
+                          class="w-4 h-4 rounded border-gray-600 bg-gray-600 text-purple-600"
+                        />
+                        <span>🌑 Cursed</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Inventory -->
+                  <div>
+                    <label class="block text-sm text-gray-300 mb-2">
+                      Starting Inventory ({customCharacterStatus.inventory.length}/20)
+                    </label>
+                    <div class="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        bind:value={newInventoryItem}
+                        on:keydown={(e) => e.key === 'Enter' && addInventoryItem()}
+                        placeholder="Add item (e.g., 'healing potion')"
+                        class="flex-1 bg-gray-700 text-gray-100 rounded px-3 py-2 text-sm border border-gray-600 focus:border-purple-500 focus:outline-none"
+                        maxlength="50"
+                      />
+                      <button
+                        on:click={addInventoryItem}
+                        disabled={!newInventoryItem.trim() || customCharacterStatus.inventory.length >= 20}
+                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded text-sm transition-colors"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    {#if customCharacterStatus.inventory.length > 0}
+                      <div class="space-y-1 max-h-32 overflow-y-auto">
+                        {#each customCharacterStatus.inventory as item, index}
+                          <div class="flex items-center justify-between bg-gray-700 rounded px-3 py-2 text-sm">
+                            <span class="text-gray-200">{index + 1}. {item}</span>
+                            <button
+                              on:click={() => removeInventoryItem(index)}
+                              class="text-red-400 hover:text-red-300 transition-colors"
+                              title="Remove item"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        {/each}
+                      </div>
+                    {:else}
+                      <div class="text-sm text-gray-500 italic text-center py-2 bg-gray-700/30 rounded">
+                        No starting items
+                      </div>
+                    {/if}
+                  </div>
+                </div>
+              {/if}
+            </div>
+          {/if}
         </div>
 
         <div class="mb-6">

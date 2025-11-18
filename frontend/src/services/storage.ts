@@ -15,6 +15,7 @@ export interface SaveSlot {
     tokenUsed: number;
     mode: string;
     characterStatus?: any;
+    customInitialCharacterStatus?: any;
   };
 }
 
