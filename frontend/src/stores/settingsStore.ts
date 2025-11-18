@@ -1,9 +1,12 @@
 import { writable } from 'svelte/store';
 
+export type Language = 'en' | 'zh-TW';
+
 export interface SettingsState {
   darkMode: boolean;
   bossKeyEnabled: boolean;
   isBossMode: boolean;
+  language: Language;
 }
 
 const SETTINGS_STORAGE_KEY = 'nyx_settings';
@@ -11,7 +14,7 @@ const SETTINGS_STORAGE_KEY = 'nyx_settings';
 // Load settings from localStorage
 function loadSettings(): SettingsState {
   if (typeof window === 'undefined') {
-    return { darkMode: true, bossKeyEnabled: false, isBossMode: false };
+    return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en' };
   }
 
   try {
@@ -23,6 +26,7 @@ function loadSettings(): SettingsState {
         darkMode: parsed.darkMode ?? true,
         bossKeyEnabled: parsed.bossKeyEnabled ?? false,
         isBossMode: false, // Always start with boss mode off
+        language: (parsed.language ?? 'en') as Language,
       };
       console.log('[SettingsStore] Loaded settings:', settings);
       return settings;
@@ -32,7 +36,7 @@ function loadSettings(): SettingsState {
   }
 
   console.log('[SettingsStore] Using default settings');
-  return { darkMode: true, bossKeyEnabled: false, isBossMode: false };
+  return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en' };
 }
 
 // Save settings to localStorage
@@ -44,6 +48,7 @@ function saveSettings(settings: SettingsState): void {
     const toSave = {
       darkMode: settings.darkMode,
       bossKeyEnabled: settings.bossKeyEnabled,
+      language: settings.language,
     };
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(toSave));
   } catch (error) {
@@ -104,6 +109,14 @@ function createSettingsStore() {
         ...state,
         isBossMode: enabled,
       }));
+    },
+
+    setLanguage: (language: Language) => {
+      update((state) => {
+        const newState = { ...state, language };
+        saveSettings(newState);
+        return newState;
+      });
     },
 
     init: () => {

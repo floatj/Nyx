@@ -1,0 +1,160 @@
+{
+  "app": {
+    "title": "Project Nyx",
+    "bossTitle": "Claude Code Web (Research preview)"
+  },
+  "common": {
+    "settings": "Settings",
+    "saveGame": "Save Game",
+    "loadGame": "Load Game",
+    "loadSavedGame": "Load Saved Game",
+    "resetGame": "Reset Game",
+    "retry": "Retry",
+    "startOver": "Start Over",
+    "startNewAdventure": "Start New Adventure",
+    "error": "Error",
+    "theEnd": "The End",
+    "youHaveDied": "You Have Died"
+  },
+  "modeSelection": {
+    "title": "Choose Your Adventure",
+    "subtitle": "Select a game mode to begin your journey",
+    "modes": {
+      "dungeon": {
+        "name": "Dungeon Crawl",
+        "description": "Explore dark catacombs filled with monsters, traps, and treasure"
+      },
+      "journey": {
+        "name": "Hero's Journey",
+        "description": "Embark on an epic quest with companions and moral choices"
+      },
+      "mystery": {
+        "name": "Mystery Night",
+        "description": "Solve a noir crime with clues, suspects, and time pressure"
+      },
+      "magical_girl": {
+        "name": "Magical Girl Battle",
+        "description": "Transform and fight dark forces with magical powers and friendship"
+      },
+      "time_traveler": {
+        "name": "Time Traveler",
+        "description": "Jump through time to prevent world-ending paradoxes and save reality"
+      },
+      "software_engineer": {
+        "name": "Lazy Office Day",
+        "description": "Survive the afternoon slump as a software engineer trying to look busy"
+      },
+      "bl_story": {
+        "name": "Boys-Love Story",
+        "description": "Experience a heartfelt romance between two male characters"
+      },
+      "gl_story": {
+        "name": "Girls-Love Story",
+        "description": "Experience a heartfelt romance between two female characters"
+      },
+      "alien_defense": {
+        "name": "Alien Defense",
+        "description": "Command Earth's forces against an alien invasion threatening humanity"
+      },
+      "custom": {
+        "name": "Custom Adventure",
+        "description": "Create your own story with a custom prompt"
+      }
+    }
+  },
+  "customPrompt": {
+    "title": "Create Custom Adventure",
+    "description": "Enter your own story prompt or load from a text/markdown file. The AI will use your prompt to start the adventure.",
+    "label": "Custom Prompt",
+    "placeholder": "Example: You are a space explorer who has just discovered an ancient alien artifact on a remote planet. The artifact begins to glow as you approach it...",
+    "generating": "Generating...",
+    "generateRandom": "Generate Random Prompt",
+    "optimizing": "Optimizing...",
+    "optimizeYourPrompt": "Optimize Your Prompt",
+    "enableCharacterStatus": "Enable Character Status Tracking",
+    "characterStatusDescription": "Track health, stamina, conditions, and inventory throughout your adventure. This adds RPG-style mechanics to your story.",
+    "customizeInitialStatus": "Customize Initial Character Status",
+    "health": "Health",
+    "stamina": "Stamina",
+    "startingConditions": "Starting Conditions",
+    "conditionsLabel": {
+      "injured": "Injured",
+      "poisoned": "Poisoned",
+      "blessed": "Blessed",
+      "cursed": "Cursed"
+    },
+    "startingInventory": "Starting Inventory",
+    "addItemPlaceholder": "Add item (e.g., 'healing potion')",
+    "add": "Add",
+    "noStartingItems": "No starting items",
+    "orLoadFromFile": "Or Load from File",
+    "cancel": "Cancel",
+    "startAdventure": "Start Adventure"
+  },
+  "gameOver": {
+    "death": {
+      "title": "You Have Died",
+      "message": "Your journey has come to a tragic end."
+    },
+    "regular": {
+      "title": "The End",
+      "message": "Your story has concluded."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "failedToStart": "Failed to start game"
+  },
+  "settings": {
+    "title": "Settings",
+    "darkMode": {
+      "label": "Dark Mode",
+      "description": "Toggle between light and dark theme"
+    },
+    "bossKey": {
+      "label": "Boss Key",
+      "description": "Enable boss key to quickly hide the game interface"
+    },
+    "language": {
+      "label": "Language",
+      "description": "Select your preferred language for UI and game prompts",
+      "options": {
+        "en": "English",
+        "zh-TW": "繁體中文"
+      }
+    },
+    "aboutBossKey": {
+      "title": "About Boss Key",
+      "description": "Press",
+      "key": "Ctrl + /",
+      "action": "to quickly switch to a decoy screen when you need to hide the game.",
+      "tip": "Perfect for when the boss walks by! 😉"
+    }
+  },
+  "gameSettings": {
+    "title": "Game Settings",
+    "characterStatus": {
+      "label": "Enable Character Status Tracking",
+      "description": "Track your character's health, stamina, conditions, and inventory throughout the game"
+    },
+    "start": "Start Game"
+  },
+  "characterSheet": {
+    "title": "Character Status",
+    "health": "Health",
+    "stamina": "Stamina",
+    "conditions": "Conditions",
+    "inventory": "Inventory",
+    "empty": "Empty",
+    "conditionLabels": {
+      "injured": "Injured",
+      "poisoned": "Poisoned",
+      "blessed": "Blessed",
+      "cursed": "Cursed"
+    }
+  },
+  "choices": {
+    "customAction": "Other Action",
+    "customPlaceholder": "Enter your custom action..."
+  }
+}

@@ -2,6 +2,7 @@
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import type { CharacterStatus } from '../stores/gameStore';
+  import { t } from '../i18n';
 
   export let status: CharacterStatus | null;
 
@@ -73,12 +74,12 @@
 
 {#if status}
   <div class="character-sheet bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-3">
-    <h3 class="text-lg font-bold text-gray-100">Character Status</h3>
+    <h3 class="text-lg font-bold text-gray-100">{$t('characterSheet.title')}</h3>
 
     <!-- Health Bar -->
     <div class="stat-bar">
       <div class="flex justify-between mb-1">
-        <span class="text-sm text-gray-300">Health</span>
+        <span class="text-sm text-gray-300">{$t('characterSheet.health')}</span>
         <span class="text-sm text-gray-300 flex items-center gap-1">
           {Math.round(status.health)}/100
           {#if healthChange === 'up'}
@@ -99,7 +100,7 @@
     <!-- Stamina Bar -->
     <div class="stat-bar">
       <div class="flex justify-between mb-1">
-        <span class="text-sm text-gray-300">Stamina</span>
+        <span class="text-sm text-gray-300">{$t('characterSheet.stamina')}</span>
         <span class="text-sm text-gray-300 flex items-center gap-1">
           {Math.round(status.stamina)}/100
           {#if staminaChange === 'up'}
@@ -120,24 +121,24 @@
     <!-- Conditions -->
     {#if hasConditions}
       <div class="conditions">
-        <span class="text-sm text-gray-400">Conditions:</span>
+        <span class="text-sm text-gray-400">{$t('characterSheet.conditions')}:</span>
         <div class="flex flex-wrap gap-2 mt-1">
           {#if status.conditions.injured}
-            <span class="badge bg-red-900 text-red-200 px-2 py-1 rounded text-xs">🩹 Injured</span>
+            <span class="badge bg-red-900 text-red-200 px-2 py-1 rounded text-xs">🩹 {$t('characterSheet.conditionLabels.injured')}</span>
           {/if}
           {#if status.conditions.poisoned}
             <span class="badge bg-green-900 text-green-200 px-2 py-1 rounded text-xs"
-              >☠️ Poisoned</span
+              >☠️ {$t('characterSheet.conditionLabels.poisoned')}</span
             >
           {/if}
           {#if status.conditions.blessed}
             <span class="badge bg-yellow-900 text-yellow-200 px-2 py-1 rounded text-xs"
-              >✨ Blessed</span
+              >✨ {$t('characterSheet.conditionLabels.blessed')}</span
             >
           {/if}
           {#if status.conditions.cursed}
             <span class="badge bg-purple-900 text-purple-200 px-2 py-1 rounded text-xs"
-              >🌑 Cursed</span
+              >🌑 {$t('characterSheet.conditionLabels.cursed')}</span
             >
           {/if}
         </div>
@@ -147,7 +148,7 @@
     <!-- Inventory -->
     <div class="inventory">
       <div class="flex justify-between items-center mb-1">
-        <span class="text-sm text-gray-400 font-semibold">Inventory</span>
+        <span class="text-sm text-gray-400 font-semibold">{$t('characterSheet.inventory')}</span>
         <span class="text-xs text-gray-500 bg-gray-700 px-2 py-0.5 rounded-full">
           {status.inventory.length}/20
         </span>
@@ -172,7 +173,7 @@
         </ul>
       {:else}
         <div class="text-sm text-gray-500 italic mt-1 text-center py-2 bg-gray-700/30 rounded">
-          Empty
+          {$t('characterSheet.empty')}
         </div>
       {/if}
     </div>

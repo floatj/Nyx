@@ -1,5 +1,6 @@
 <script lang="ts">
   import { gameStore, canSelectChoice, isLoading } from '../stores/gameStore';
+  import { t } from '../i18n';
 
   $: choices = $gameStore.choices;
   let customAction = '';
@@ -46,7 +47,7 @@
           bind:value={customAction}
           on:keypress={handleKeyPress}
           disabled={!$canSelectChoice}
-          placeholder="Enter your custom action..."
+          placeholder={$t('choices.customPlaceholder')}
           class="custom-action-input"
           data-test="custom-action-input"
         />
@@ -59,7 +60,7 @@
           {#if !$canSelectChoice && $isLoading}
             <span class="absolute left-3 top-1/2 -translate-y-1/2 inline-block animate-spin">⏳</span>
           {/if}
-          Other Action
+          {$t('choices.customAction')}
         </button>
       </div>
     </div>

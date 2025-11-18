@@ -252,16 +252,23 @@ export function getInitialCharacterStatus(mode: GameMode): CharacterStatus {
 }
 
 export class PromptService {
-  buildSystemPrompt(mode: GameMode, customPrompt?: string, characterStatusEnabled: boolean = true): string {
+  buildSystemPrompt(mode: GameMode, customPrompt?: string, characterStatusEnabled: boolean = true, language: 'en' | 'zh-TW' = 'en'): string {
     // Choose the appropriate format addon
     const formatAddon = characterStatusEnabled ? CHARACTER_STATUS_PROMPT_ADDON : NO_CHARACTER_STATUS_PROMPT_ADDON;
     const basePrompt = BASE_SYSTEM_PROMPT_CORE + formatAddon + CLOSING_REMINDER;
 
-    if (mode === 'custom' && customPrompt) {
-      return `${basePrompt}
+    // Language instruction based on selected language
+    const languageInstruction = language === 'zh-TW'
+      ? `\n\nLANGUAGE INSTRUCTION:\nCRITICAL: Generate ALL narration and choices in Traditional Chinese (繁體中文). All text in the JSON output must be in Traditional Chinese.`
+      : `\n\nLANGUAGE INSTRUCTION:\nCRITICAL: Generate ALL narration and choices in English. All text in the JSON output must be in English.`;
 
-LANGUAGE INSTRUCTION:
-CRITICAL: Generate ALL narration and choices in the SAME LANGUAGE as the custom setting provided below. Match the language exactly - if the custom setting is in Chinese, respond in Chinese; if it's in English, respond in English, etc.
+    if (mode === 'custom' && customPrompt) {
+      // For custom mode, also allow matching the language of the custom prompt
+      const customLanguageNote = language === 'zh-TW'
+        ? 'If the custom setting below is in a different language, still respond in Traditional Chinese.'
+        : 'If the custom setting below is in a different language, still respond in English.';
+
+      return `${basePrompt}${languageInstruction} ${customLanguageNote}
 
 CUSTOM SETTING:
 ${customPrompt}
@@ -271,7 +278,7 @@ ${SAFETY_ADDENDUM}`;
 
     const modeLore = MODE_LORE[mode] || MODE_LORE.dungeon;
 
-    return `${basePrompt}
+    return `${basePrompt}${languageInstruction}
 
 ${modeLore}
 
@@ -282,7 +289,8 @@ ${SAFETY_ADDENDUM}`;
     mode: GameMode,
     customPrompt?: string,
     characterStatusEnabled: boolean = true,
-    customInitialCharacterStatus?: CharacterStatus
+    customInitialCharacterStatus?: CharacterStatus,
+    language: 'en' | 'zh-TW' = 'en'
   ): string {
     // Use custom character status if provided, otherwise use mode defaults
     const initialStatus = customInitialCharacterStatus || getInitialCharacterStatus(mode);
@@ -291,44 +299,41 @@ ${SAFETY_ADDENDUM}`;
       : '';
 
     if (mode === 'custom' && customPrompt) {
-      return `Begin the adventure.${statusContext}
+      const customInstruction = language === 'zh-TW'
+        ? '開始冒險。描述開場場景，並提供 3-4 個初始選擇以繼續進行。記住要使用繁體中文。'
+        : 'Begin the adventure. Describe the opening scene and provide 3-4 initial choices for how to proceed. Remember to use English.';
 
-Describe the opening scene and provide 3-4 initial choices for how to proceed. Remember to use the same language as the custom setting.`;
+      return `${customInstruction}${statusContext}`;
     }
 
-    const starters: Record<GameMode, string> = {
-      dungeon: `Begin the adventure. The player stands at the entrance of dark catacombs.${statusContext}
-
-Describe what they see and provide 3-4 initial choices for how to proceed.`,
-      journey: `Begin the adventure. The player is a humble villager who has just received a mysterious summons.${statusContext}
-
-Describe the moment and provide 3-4 choices.`,
-      mystery: `Begin the adventure. The player is a detective arriving at a crime scene.${statusContext}
-
-Describe what they observe and provide 3-4 initial investigation choices.`,
-      magical_girl: `Begin the adventure. The player is an ordinary middle school student when suddenly a mysterious creature appears with an urgent warning about dark forces.${statusContext}
-
-Describe the magical awakening moment and provide 3-4 initial choices for how to respond.`,
-      time_traveler: `Begin the adventure. The player receives a desperate message from the future: the world will end in 72 hours unless they can fix a critical moment in history.${statusContext}
-
-Describe the moment they receive their temporal device and the first crisis alert, then provide 3-4 initial choices for which time period to investigate first.`,
-      software_engineer: `Begin the adventure. The player is a software engineer sitting at their desk on a drowsy afternoon. It's 2 PM, they just had lunch, and there's still 3 hours until they can leave. An urgent-looking email notification pops up.${statusContext}
-
-Describe the afternoon office atmosphere and the initial situation, then provide 3-4 choices for how to handle the afternoon (productive work, strategic laziness, or somewhere in between).`,
-      bl_story: `Begin the adventure. The player is starting a new chapter in their life when they unexpectedly meet someone who immediately catches their attention in an inexplicable way.${statusContext}
-
-Describe the first meeting moment, the initial attraction, and the butterflies in their stomach, then provide 3-4 choices for how to approach this new connection.`,
-      gl_story: `Begin the adventure. The player is starting a new chapter in their life when they unexpectedly meet someone who immediately catches their attention in an inexplicable way.${statusContext}
-
-Describe the first meeting moment, the initial attraction, and the butterflies in their stomach, then provide 3-4 choices for how to approach this new connection.`,
-      alien_defense: `Begin the adventure. The player is a military commander when suddenly alarms blare across the base: unknown objects have been detected entering Earth's atmosphere. First contact is happening now.${statusContext}
-
-Describe the moment of first contact, the chaos in the command center, and the alien threat appearing on screens, then provide 3-4 initial tactical choices for how to respond to this unprecedented crisis.`,
-      custom: `Begin the adventure.${statusContext}
-
-Describe the opening scene and provide 3-4 initial choices.`,
+    // Language-specific starters
+    const startersEn: Record<GameMode, string> = {
+      dungeon: `Begin the adventure. The player stands at the entrance of dark catacombs.${statusContext}\n\nDescribe what they see and provide 3-4 initial choices for how to proceed.`,
+      journey: `Begin the adventure. The player is a humble villager who has just received a mysterious summons.${statusContext}\n\nDescribe the moment and provide 3-4 choices.`,
+      mystery: `Begin the adventure. The player is a detective arriving at a crime scene.${statusContext}\n\nDescribe what they observe and provide 3-4 initial investigation choices.`,
+      magical_girl: `Begin the adventure. The player is an ordinary middle school student when suddenly a mysterious creature appears with an urgent warning about dark forces.${statusContext}\n\nDescribe the magical awakening moment and provide 3-4 initial choices for how to respond.`,
+      time_traveler: `Begin the adventure. The player receives a desperate message from the future: the world will end in 72 hours unless they can fix a critical moment in history.${statusContext}\n\nDescribe the moment they receive their temporal device and the first crisis alert, then provide 3-4 initial choices for which time period to investigate first.`,
+      software_engineer: `Begin the adventure. The player is a software engineer sitting at their desk on a drowsy afternoon. It's 2 PM, they just had lunch, and there's still 3 hours until they can leave. An urgent-looking email notification pops up.${statusContext}\n\nDescribe the afternoon office atmosphere and the initial situation, then provide 3-4 choices for how to handle the afternoon (productive work, strategic laziness, or somewhere in between).`,
+      bl_story: `Begin the adventure. The player is starting a new chapter in their life when they unexpectedly meet someone who immediately catches their attention in an inexplicable way.${statusContext}\n\nDescribe the first meeting moment, the initial attraction, and the butterflies in their stomach, then provide 3-4 choices for how to approach this new connection.`,
+      gl_story: `Begin the adventure. The player is starting a new chapter in their life when they unexpectedly meet someone who immediately catches their attention in an inexplicable way.${statusContext}\n\nDescribe the first meeting moment, the initial attraction, and the butterflies in their stomach, then provide 3-4 choices for how to approach this new connection.`,
+      alien_defense: `Begin the adventure. The player is a military commander when suddenly alarms blare across the base: unknown objects have been detected entering Earth's atmosphere. First contact is happening now.${statusContext}\n\nDescribe the moment of first contact, the chaos in the command center, and the alien threat appearing on screens, then provide 3-4 initial tactical choices for how to respond to this unprecedented crisis.`,
+      custom: `Begin the adventure.${statusContext}\n\nDescribe the opening scene and provide 3-4 initial choices.`,
     };
 
+    const startersZhTW: Record<GameMode, string> = {
+      dungeon: `開始冒險。玩家站在黑暗地下墓穴的入口。${statusContext}\n\n描述他們看到的景象，並提供 3-4 個初始選擇以繼續進行。`,
+      journey: `開始冒險。玩家是一個卑微的村民，剛剛收到一個神秘的召喚。${statusContext}\n\n描述這個時刻，並提供 3-4 個選擇。`,
+      mystery: `開始冒險。玩家是一名偵探，正抵達犯罪現場。${statusContext}\n\n描述他們觀察到的情況，並提供 3-4 個初始調查選擇。`,
+      magical_girl: `開始冒險。玩家是一名普通的中學生，突然間一個神秘的生物出現，並緊急警告黑暗勢力的來臨。${statusContext}\n\n描述魔法覺醒的時刻，並提供 3-4 個初始選擇以回應。`,
+      time_traveler: `開始冒險。玩家收到來自未來的緊急訊息：世界將在 72 小時內終結，除非他們能修正歷史上的關鍵時刻。${statusContext}\n\n描述他們接收到時空裝置和第一個危機警報的時刻，然後提供 3-4 個初始選擇，選擇要先調查哪個時期。`,
+      software_engineer: `開始冒險。玩家是一名軟體工程師，在昏昏欲睡的下午坐在辦公桌前。現在是下午 2 點，他們剛吃完午餐，距離下班還有 3 小時。一封看起來很緊急的電子郵件通知彈出。${statusContext}\n\n描述下午辦公室的氛圍和初始情況，然後提供 3-4 個選擇，決定如何處理這個下午（高效工作、策略性摸魚，或介於兩者之間）。`,
+      bl_story: `開始冒險。玩家正在開始人生的新篇章，卻意外遇到一個立刻以難以言喻的方式吸引他們注意的人。${statusContext}\n\n描述初次見面的時刻、最初的吸引力，以及心中的悸動，然後提供 3-4 個選擇，決定如何建立這個新的聯繫。`,
+      gl_story: `開始冒險。玩家正在開始人生的新篇章，卻意外遇到一個立刻以難以言喻的方式吸引他們注意的人。${statusContext}\n\n描述初次見面的時刻、最初的吸引力，以及心中的悸動，然後提供 3-4 個選擇，決定如何建立這個新的聯繫。`,
+      alien_defense: `開始冒險。玩家是一名軍事指揮官，突然間基地的警報響徹雲霄：偵測到未知物體進入地球大氣層。第一次接觸正在發生。${statusContext}\n\n描述第一次接觸的時刻、指揮中心的混亂，以及螢幕上出現的外星威脅，然後提供 3-4 個初始戰術選擇，決定如何回應這前所未有的危機。`,
+      custom: `開始冒險。${statusContext}\n\n描述開場場景，並提供 3-4 個初始選擇。`,
+    };
+
+    const starters = language === 'zh-TW' ? startersZhTW : startersEn;
     return starters[mode] || starters.dungeon;
   }
 

@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { settingsStore } from '../stores/settingsStore';
+  import { settingsStore, type Language } from '../stores/settingsStore';
+  import { t } from '../i18n';
 
   export let onBack: () => void;
 
   $: darkMode = $settingsStore.darkMode;
   $: bossKeyEnabled = $settingsStore.bossKeyEnabled;
+  $: language = $settingsStore.language;
 
   function handleDarkModeChange() {
     settingsStore.toggleDarkMode();
@@ -13,13 +15,18 @@
   function handleBossKeyChange() {
     settingsStore.toggleBossKeyEnabled();
   }
+
+  function handleLanguageChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    settingsStore.setLanguage(target.value as Language);
+  }
 </script>
 
 <div class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
   <!-- Header -->
   <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 transition-colors">
     <div class="max-w-screen-lg mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Settings</h1>
+      <h1 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{$t('settings.title')}</h1>
       <button
         on:click={onBack}
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
@@ -35,9 +42,9 @@
         <!-- Dark Mode Setting -->
         <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
           <div class="flex-1">
-            <h3 class="text-lg font-semibold mb-1">Dark Mode</h3>
+            <h3 class="text-lg font-semibold mb-1">{$t('settings.darkMode.label')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Enable dark theme for the entire application. This setting is saved automatically.
+              {$t('settings.darkMode.description')}
             </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-4">
@@ -56,9 +63,9 @@
         <!-- Boss Key Setting -->
         <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
           <div class="flex-1">
-            <h3 class="text-lg font-semibold mb-1">Boss Key</h3>
+            <h3 class="text-lg font-semibold mb-1">{$t('settings.bossKey.label')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Enable the boss key feature. When enabled, press <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">Ctrl + /</kbd> to quickly switch to a coding interface that looks like you're working.
+              {$t('settings.bossKey.description')}
             </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-4">
@@ -74,14 +81,32 @@
           </label>
         </div>
 
+        <!-- Language Setting -->
+        <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold mb-1">{$t('settings.language.label')}</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              {$t('settings.language.description')}
+            </p>
+          </div>
+          <select
+            value={language}
+            on:change={handleLanguageChange}
+            class="ml-4 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+          >
+            <option value="en">{$t('settings.language.options.en')}</option>
+            <option value="zh-TW">{$t('settings.language.options.zh-TW')}</option>
+          </select>
+        </div>
+
         <!-- Info Section -->
         <div class="pt-4">
           <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
-              ℹ️ About Boss Key
+              ℹ️ {$t('settings.aboutBossKey.title')}
             </h4>
             <p class="text-sm text-blue-800 dark:text-blue-400">
-              The boss key feature disguises the game as a code editor. When activated, the interface will look like you're working on a coding project. Press <kbd class="px-2 py-1 bg-blue-200 dark:bg-blue-800 rounded text-xs font-mono">Ctrl + /</kbd> again to return to the game.
+              {$t('settings.aboutBossKey.description')} <kbd class="px-2 py-1 bg-blue-200 dark:bg-blue-800 rounded text-xs font-mono">{$t('settings.aboutBossKey.key')}</kbd> {$t('settings.aboutBossKey.action')} {$t('settings.aboutBossKey.tip')}
             </p>
           </div>
         </div>
