@@ -405,6 +405,50 @@
           </button>
 
           <button
+            class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
+            on:click={() => showGameSettings('software_engineer')}
+          >
+            <div class="text-4xl mb-3">💻</div>
+            <h3 class="text-xl font-bold mb-2">Lazy Office Day</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Survive the afternoon slump as a software engineer trying to look busy
+            </p>
+          </button>
+
+          <button
+            class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
+            on:click={() => showGameSettings('bl_story')}
+          >
+            <div class="text-4xl mb-3">💙</div>
+            <h3 class="text-xl font-bold mb-2">Boys-Love Story</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Experience a heartfelt romance between two male characters
+            </p>
+          </button>
+
+          <button
+            class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
+            on:click={() => showGameSettings('gl_story')}
+          >
+            <div class="text-4xl mb-3">💖</div>
+            <h3 class="text-xl font-bold mb-2">Girls-Love Story</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Experience a heartfelt romance between two female characters
+            </p>
+          </button>
+
+          <button
+            class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
+            on:click={() => showGameSettings('alien_defense')}
+          >
+            <div class="text-4xl mb-3">🛸</div>
+            <h3 class="text-xl font-bold mb-2">Alien Defense</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Command Earth's forces against an alien invasion threatening humanity
+            </p>
+          </button>
+
+          <button
             class="mode-card bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-800 dark:to-pink-800 rounded-2xl p-6 hover:from-purple-500 hover:to-pink-500 dark:hover:from-purple-700 dark:hover:to-pink-700 transition-all shadow-lg hover:shadow-xl border-2 border-purple-400 dark:border-purple-500"
             on:click={openCustomPromptModal}
           >

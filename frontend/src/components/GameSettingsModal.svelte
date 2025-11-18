@@ -32,6 +32,10 @@
       mystery: 'Mystery Night',
       magical_girl: 'Magical Girl Battle',
       time_traveler: 'Time Traveler',
+      software_engineer: 'Lazy Office Day',
+      bl_story: 'Boys-Love Story',
+      gl_story: 'Girls-Love Story',
+      alien_defense: 'Alien Defense',
       custom: 'Custom Adventure',
     };
     return names[mode] || mode;
@@ -44,6 +48,10 @@
       mystery: '🔍',
       magical_girl: '🌟',
       time_traveler: '⏰',
+      software_engineer: '💻',
+      bl_story: '💙',
+      gl_story: '💖',
+      alien_defense: '🛸',
       custom: '✨',
     };
     return icons[mode] || '🎮';

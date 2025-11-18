@@ -129,6 +129,61 @@ Include a time device (watch, crystal, etc.) that tracks timeline stability and 
 Clues scattered across different eras must be pieced together to understand the true threat.
 Recurring characters appear in different time periods (ancestors, descendants, time-displaced versions).`,
 
+  software_engineer: `SETTING: Modern tech company office, afternoon slump period
+ATMOSPHERE: Mundane yet subtly comedic, relatable workplace tension
+ELEMENTS: Email notifications, meetings, coffee runs, code reviews, deadline pressures, office politics, procrastination temptations
+STYLE: Slice-of-life comedy with strategic laziness, time management challenges
+STRUCTURE: Navigate the workday while balancing productivity and energy conservation
+
+You describe the fluorescent-lit office environment, the hum of air conditioning, distant keyboard typing, ping of Slack notifications.
+Include workplace scenarios: surprise meetings, bug reports, pull requests, coworker interruptions, pointless status updates.
+Choices involve creative ways to look busy while conserving energy: strategic bathroom breaks, extended "research" time, coffee shop coding.
+Present the eternal struggle: actually doing work vs. appearing productive vs. maximum laziness without getting caught.
+Include energy/motivation mechanics where afternoon drowsiness makes tasks harder but coffee/snacks provide temporary boosts.
+Themes include work-life balance, burnout, the absurdity of corporate culture, and the art of selective productivity.`,
+
+  bl_story: `SETTING: Modern contemporary setting (school, university, or workplace)
+ATMOSPHERE: Emotionally tender, romantic tension, heartfelt with dramatic moments
+ELEMENTS: Growing attraction, misunderstandings, emotional vulnerability, supportive friendships, societal pressures, coming out journeys
+STYLE: Character-driven romance with emotional depth and genuine relationship development
+STRUCTURE: Slow-burn romance from first meeting through challenges to emotional connection
+
+You describe subtle romantic moments: lingering glances, accidental touches, heartfelt conversations, nervous confessions.
+Focus on emotional authenticity: internal struggles with feelings, fear of rejection, courage to be vulnerable.
+Include supportive side characters who provide advice and comic relief.
+Present meaningful choices about expressing feelings, taking risks in the relationship, and navigating social dynamics.
+Romance should develop naturally through shared experiences and deepening emotional bonds.
+Choices affect the relationship progression: communication, trust-building, overcoming misunderstandings, and emotional intimacy.
+Themes include self-discovery, acceptance, courage to love, and the beauty of emotional connection between two male characters.`,
+
+  gl_story: `SETTING: Modern contemporary setting (school, university, or workplace)
+ATMOSPHERE: Emotionally tender, romantic tension, heartfelt with dramatic moments
+ELEMENTS: Growing attraction, misunderstandings, emotional vulnerability, supportive friendships, societal pressures, coming out journeys
+STYLE: Character-driven romance with emotional depth and genuine relationship development
+STRUCTURE: Slow-burn romance from first meeting through challenges to emotional connection
+
+You describe subtle romantic moments: lingering glances, accidental touches, heartfelt conversations, nervous confessions.
+Focus on emotional authenticity: internal struggles with feelings, fear of rejection, courage to be vulnerable.
+Include supportive side characters who provide advice and comic relief.
+Present meaningful choices about expressing feelings, taking risks in the relationship, and navigating social dynamics.
+Romance should develop naturally through shared experiences and deepening emotional bonds.
+Choices affect the relationship progression: communication, trust-building, overcoming misunderstandings, and emotional intimacy.
+Themes include self-discovery, acceptance, courage to love, and the beauty of emotional connection between two female characters.`,
+
+  alien_defense: `SETTING: Near-future Earth under alien invasion threat
+ATMOSPHERE: Intense, high-stakes, militaristic with sci-fi elements
+ELEMENTS: Alien technology, military tactics, base defense, resource management, soldier recruitment, research & development, desperate battles
+STYLE: Strategic action with tactical combat and command decisions
+STRUCTURE: Escalating alien threat from initial contact through full-scale invasion to final confrontation
+
+You describe alien vessels in the sky, strange technology, military installations, war rooms with holographic displays, battlefield chaos.
+Include strategic elements: base building, soldier training, weapon research, intercepting alien scouts, defending cities.
+Combat should be tactical with meaningful choices: direct assault vs. guerrilla tactics, save civilians vs. strategic retreat, alien tech research vs. immediate defense.
+Present command decisions with consequences: which cities to defend, how to allocate limited resources, whether to negotiate or fight.
+Include morale management: keep humanity's hope alive while facing overwhelming alien forces.
+Player discovers alien weaknesses through combat experience, captured technology, and interrogation of alien prisoners.
+Themes include human resilience, unity in crisis, sacrifice for the greater good, and fighting for survival against impossible odds.`,
+
   custom: `SETTING: Custom adventure defined by player
 ATMOSPHERE: Varies based on custom prompt
 ELEMENTS: Player-defined setting and themes
@@ -174,6 +229,19 @@ export function getInitialCharacterStatus(mode: GameMode): CharacterStatus {
     case 'time_traveler':
       baseStatus.inventory = ['temporal device', 'historical database', 'emergency beacon'];
       baseStatus.stamina = 80; // Time travel is draining
+      break;
+    case 'software_engineer':
+      baseStatus.inventory = ['laptop', 'coffee mug', 'noise-canceling headphones', 'phone'];
+      baseStatus.stamina = 60; // Post-lunch energy slump
+      break;
+    case 'bl_story':
+      baseStatus.inventory = ['phone', 'wallet', 'keys'];
+      break;
+    case 'gl_story':
+      baseStatus.inventory = ['phone', 'wallet', 'keys'];
+      break;
+    case 'alien_defense':
+      baseStatus.inventory = ['command tablet', 'security clearance', 'communication device', 'sidearm'];
       break;
     case 'custom':
       baseStatus.inventory = ['basic supplies'];
@@ -244,6 +312,18 @@ Describe the magical awakening moment and provide 3-4 initial choices for how to
       time_traveler: `Begin the adventure. The player receives a desperate message from the future: the world will end in 72 hours unless they can fix a critical moment in history.${statusContext}
 
 Describe the moment they receive their temporal device and the first crisis alert, then provide 3-4 initial choices for which time period to investigate first.`,
+      software_engineer: `Begin the adventure. The player is a software engineer sitting at their desk on a drowsy afternoon. It's 2 PM, they just had lunch, and there's still 3 hours until they can leave. An urgent-looking email notification pops up.${statusContext}
+
+Describe the afternoon office atmosphere and the initial situation, then provide 3-4 choices for how to handle the afternoon (productive work, strategic laziness, or somewhere in between).`,
+      bl_story: `Begin the adventure. The player is starting a new chapter in their life when they unexpectedly meet someone who immediately catches their attention in an inexplicable way.${statusContext}
+
+Describe the first meeting moment, the initial attraction, and the butterflies in their stomach, then provide 3-4 choices for how to approach this new connection.`,
+      gl_story: `Begin the adventure. The player is starting a new chapter in their life when they unexpectedly meet someone who immediately catches their attention in an inexplicable way.${statusContext}
+
+Describe the first meeting moment, the initial attraction, and the butterflies in their stomach, then provide 3-4 choices for how to approach this new connection.`,
+      alien_defense: `Begin the adventure. The player is a military commander when suddenly alarms blare across the base: unknown objects have been detected entering Earth's atmosphere. First contact is happening now.${statusContext}
+
+Describe the moment of first contact, the chaos in the command center, and the alien threat appearing on screens, then provide 3-4 initial tactical choices for how to respond to this unprecedented crisis.`,
       custom: `Begin the adventure.${statusContext}
 
 Describe the opening scene and provide 3-4 initial choices.`,
