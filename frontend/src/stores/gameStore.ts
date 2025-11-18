@@ -59,6 +59,7 @@ export type GameEvent =
   | { type: 'STREAM_CHUNK'; data: string }
   | { type: 'STREAM_COMPLETE'; output: LLMOutput; tokenUsed?: number }
   | { type: 'SELECT_CHOICE'; choiceId: string }
+  | { type: 'SELECT_CUSTOM_CHOICE'; customText: string }
   | { type: 'INPUT_SUBMITTED'; text: string }
   | { type: 'PAUSE' }
   | { type: 'RESUME' }
@@ -112,6 +113,7 @@ const VALID_TRANSITIONS: Record<GameState, Partial<Record<GameEvent['type'], Gam
   },
   awaiting_choice: {
     SELECT_CHOICE: 'processing_input',
+    SELECT_CUSTOM_CHOICE: 'processing_input',
     INPUT_SUBMITTED: 'processing_input',
     PAUSE: 'paused',
     END_GAME: 'game_over',
@@ -260,6 +262,14 @@ function createGameStore() {
             return {
               ...state,
               history: [...state.history, { role: 'user', content: choice.label }],
+              state: 'processing_input',
+            };
+          }
+
+          case 'SELECT_CUSTOM_CHOICE': {
+            return {
+              ...state,
+              history: [...state.history, { role: 'user', content: event.customText }],
               state: 'processing_input',
             };
           }
