@@ -40,7 +40,7 @@
       {/each}
 
       <!-- Custom Action Input -->
-      <div class="custom-action-container mt-2">
+      <div class="custom-action-container flex gap-3 mt-2">
         <input
           type="text"
           bind:value={customAction}
@@ -51,7 +51,7 @@
           data-test="custom-action-input"
         />
         <button
-          class="custom-action-button relative mt-3"
+          class="custom-action-button relative"
           disabled={!$canSelectChoice || !customAction.trim()}
           on:click={handleCustomAction}
           data-test="custom-action-button"
