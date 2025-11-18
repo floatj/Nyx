@@ -348,7 +348,7 @@
           <p class="text-gray-500 dark:text-gray-400">Select a game mode to begin your journey</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <button
             class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
             on:click={() => showGameSettings('dungeon')}
@@ -379,6 +379,28 @@
             <h3 class="text-xl font-bold mb-2">Mystery Night</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
               Solve a noir crime with clues, suspects, and time pressure
+            </p>
+          </button>
+
+          <button
+            class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
+            on:click={() => showGameSettings('magical_girl')}
+          >
+            <div class="text-4xl mb-3">🌟</div>
+            <h3 class="text-xl font-bold mb-2">Magical Girl Battle</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Transform and fight dark forces with magical powers and friendship
+            </p>
+          </button>
+
+          <button
+            class="mode-card bg-white dark:bg-gray-800 rounded-2xl p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
+            on:click={() => showGameSettings('time_traveler')}
+          >
+            <div class="text-4xl mb-3">⏰</div>
+            <h3 class="text-xl font-bold mb-2">Time Traveler</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Jump through time to prevent world-ending paradoxes and save reality
             </p>
           </button>
 

@@ -1,6 +1,6 @@
 // Core domain types
 
-export type GameMode = 'dungeon' | 'journey' | 'mystery' | 'custom';
+export type GameMode = 'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler' | 'custom';
 
 export type MessageRole = 'system' | 'assistant' | 'user';
 
