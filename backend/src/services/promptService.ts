@@ -102,6 +102,33 @@ Plant clues in narration that observant players can piece together.
 Include time pressure (the trail goes cold, suspect might flee).
 Choices affect what information the player gathers and trust with NPCs.`,
 
+  magical_girl: `SETTING: Modern Japanese city with hidden magical realm
+ATMOSPHERE: Colorful, dramatic, emotionally charged with dark undertones
+ELEMENTS: Transformation sequences, magical powers, friendship bonds, dark creatures, emotional struggles
+STYLE: Anime-inspired, balance between lighthearted moments and serious battles
+STRUCTURE: Daily life interrupted by magical threats, escalating challenges
+
+You describe vibrant transformation scenes, spectacular magical attacks, and emotional moments.
+Include cute mascot companions who provide guidance and comic relief.
+Battles against dark creatures should be visually dramatic with named special attacks.
+Friendship and emotional bonds are sources of power - choices affect relationships with allies.
+Balance school/daily life scenes with magical girl duties and the toll it takes.
+Themes include responsibility, sacrifice, hope vs despair, and the power of believing in oneself.`,
+
+  time_traveler: `SETTING: Multiple time periods across history and future
+ATMOSPHERE: Urgent, paradoxical, intellectually engaging
+ELEMENTS: Time paradoxes, historical events, butterfly effects, temporal anomalies, world-ending crises
+STYLE: Sci-fi adventure with puzzle elements and moral weight
+STRUCTURE: Jump between eras to prevent catastrophic timeline collapse
+
+You describe vivid historical and futuristic settings with period-appropriate details.
+Include time travel mechanics (limited jumps, temporal energy, timeline corruption).
+Player's actions in the past create ripple effects that change the present/future.
+Present moral dilemmas: save one person vs. preserve the timeline, prevent tragedy vs. cause worse outcome.
+Include a time device (watch, crystal, etc.) that tracks timeline stability and remaining jumps.
+Clues scattered across different eras must be pieced together to understand the true threat.
+Recurring characters appear in different time periods (ancestors, descendants, time-displaced versions).`,
+
   custom: `SETTING: Custom adventure defined by player
 ATMOSPHERE: Varies based on custom prompt
 ELEMENTS: Player-defined setting and themes
@@ -139,6 +166,14 @@ export function getInitialCharacterStatus(mode: GameMode): CharacterStatus {
       break;
     case 'mystery':
       baseStatus.inventory = ['notepad', 'detective badge', 'pen'];
+      break;
+    case 'magical_girl':
+      baseStatus.inventory = ['magical compact', 'transformation brooch', 'school bag'];
+      baseStatus.conditions.blessed = true; // Start with magical blessing
+      break;
+    case 'time_traveler':
+      baseStatus.inventory = ['temporal device', 'historical database', 'emergency beacon'];
+      baseStatus.stamina = 80; // Time travel is draining
       break;
     case 'custom':
       baseStatus.inventory = ['basic supplies'];
@@ -203,6 +238,12 @@ Describe the moment and provide 3-4 choices.`,
       mystery: `Begin the adventure. The player is a detective arriving at a crime scene.${statusContext}
 
 Describe what they observe and provide 3-4 initial investigation choices.`,
+      magical_girl: `Begin the adventure. The player is an ordinary middle school student when suddenly a mysterious creature appears with an urgent warning about dark forces.${statusContext}
+
+Describe the magical awakening moment and provide 3-4 initial choices for how to respond.`,
+      time_traveler: `Begin the adventure. The player receives a desperate message from the future: the world will end in 72 hours unless they can fix a critical moment in history.${statusContext}
+
+Describe the moment they receive their temporal device and the first crisis alert, then provide 3-4 initial choices for which time period to investigate first.`,
       custom: `Begin the adventure.${statusContext}
 
 Describe the opening scene and provide 3-4 initial choices.`,

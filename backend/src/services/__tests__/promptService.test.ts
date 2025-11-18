@@ -28,8 +28,26 @@ describe('PromptService', () => {
       expect(prompt).toContain('Clues, suspects, red herrings');
     });
 
+    it('should build system prompt for magical_girl mode', () => {
+      const prompt = promptService.buildSystemPrompt('magical_girl');
+
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain('Modern Japanese city');
+      expect(prompt).toContain('Transformation sequences');
+      expect(prompt).toContain('magical powers');
+    });
+
+    it('should build system prompt for time_traveler mode', () => {
+      const prompt = promptService.buildSystemPrompt('time_traveler');
+
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain('Multiple time periods');
+      expect(prompt).toContain('Time paradoxes');
+      expect(prompt).toContain('butterfly effects');
+    });
+
     it('should include safety guidelines in all prompts', () => {
-      const modes: Array<'dungeon' | 'journey' | 'mystery'> = ['dungeon', 'journey', 'mystery'];
+      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler'];
 
       for (const mode of modes) {
         const prompt = promptService.buildSystemPrompt(mode);
@@ -87,6 +105,22 @@ describe('PromptService', () => {
 
       expect(prompt).toContain('detective');
       expect(prompt).toContain('crime scene');
+    });
+
+    it('should build initial prompt for magical_girl mode', () => {
+      const prompt = promptService.buildInitialPrompt('magical_girl');
+
+      expect(prompt).toContain('middle school student');
+      expect(prompt).toContain('mysterious creature');
+      expect(prompt).toContain('dark forces');
+    });
+
+    it('should build initial prompt for time_traveler mode', () => {
+      const prompt = promptService.buildInitialPrompt('time_traveler');
+
+      expect(prompt).toContain('message from the future');
+      expect(prompt).toContain('temporal device');
+      expect(prompt).toContain('72 hours');
     });
 
     it('should build initial prompt for custom mode with language reminder', () => {
@@ -246,6 +280,27 @@ That should work!`;
       expect(status.inventory).toContain('pen');
     });
 
+    it('should initialize character status for magical_girl mode', () => {
+      const status = getInitialCharacterStatus('magical_girl');
+
+      expect(status.health).toBe(100);
+      expect(status.stamina).toBe(100);
+      expect(status.inventory).toContain('magical compact');
+      expect(status.inventory).toContain('transformation brooch');
+      expect(status.inventory).toContain('school bag');
+      expect(status.conditions.blessed).toBe(true);
+    });
+
+    it('should initialize character status for time_traveler mode', () => {
+      const status = getInitialCharacterStatus('time_traveler');
+
+      expect(status.health).toBe(100);
+      expect(status.stamina).toBe(80);
+      expect(status.inventory).toContain('temporal device');
+      expect(status.inventory).toContain('historical database');
+      expect(status.inventory).toContain('emergency beacon');
+    });
+
     it('should initialize character status for custom mode', () => {
       const status = getInitialCharacterStatus('custom');
 
@@ -254,12 +309,13 @@ That should work!`;
       expect(status.inventory).toContain('basic supplies');
     });
 
-    it('should initialize all conditions as false', () => {
-      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'custom'> = [
+    it('should initialize all conditions as false for most modes', () => {
+      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'custom' | 'time_traveler'> = [
         'dungeon',
         'journey',
         'mystery',
         'custom',
+        'time_traveler',
       ];
 
       for (const mode of modes) {
@@ -427,7 +483,7 @@ That should work!`;
     });
 
     it('should work for all modes when character status is disabled', () => {
-      const modes: Array<'dungeon' | 'journey' | 'mystery'> = ['dungeon', 'journey', 'mystery'];
+      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler'];
 
       for (const mode of modes) {
         const prompt = promptService.buildSystemPrompt(mode, undefined, false);
@@ -466,7 +522,7 @@ That should work!`;
     });
 
     it('should work for all modes when character status is disabled', () => {
-      const modes: Array<'dungeon' | 'journey' | 'mystery'> = ['dungeon', 'journey', 'mystery'];
+      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler'];
 
       for (const mode of modes) {
         const prompt = promptService.buildInitialPrompt(mode, undefined, false);

@@ -30,6 +30,8 @@
       dungeon: 'Dungeon Crawl',
       journey: "Hero's Journey",
       mystery: 'Mystery Night',
+      magical_girl: 'Magical Girl Battle',
+      time_traveler: 'Time Traveler',
       custom: 'Custom Adventure',
     };
     return names[mode] || mode;
@@ -40,6 +42,8 @@
       dungeon: '🏰',
       journey: '⚔️',
       mystery: '🔍',
+      magical_girl: '🌟',
+      time_traveler: '⏰',
       custom: '✨',
     };
     return icons[mode] || '🎮';
