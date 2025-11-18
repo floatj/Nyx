@@ -41,6 +41,7 @@ export interface PlayRequest {
   sessionId: string;
   mode: GameMode;
   customPrompt?: string;
+  customInitialCharacterStatus?: CharacterStatus;
   history: Message[];
   player_input: string;
   model?: string;

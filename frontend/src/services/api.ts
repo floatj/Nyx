@@ -1,4 +1,4 @@
-import type { GameMode, Message, LLMOutput } from '../stores/gameStore';
+import type { GameMode, Message, LLMOutput, CharacterStatus } from '../stores/gameStore';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -13,6 +13,7 @@ export interface PlayRequest {
   sessionId: string;
   mode: GameMode;
   customPrompt?: string;
+  customInitialCharacterStatus?: CharacterStatus;
   history: Message[];
   player_input: string;
   model?: string;
