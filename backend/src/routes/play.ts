@@ -37,7 +37,8 @@ router.post('/', async (req: Request, res: Response) => {
     const messages = await historyManager.prepareMessages(
       systemPrompt,
       playRequest.history,
-      playRequest.mode
+      playRequest.mode,
+      characterStatusEnabled
     );
 
     const estimatedTokens = historyManager.estimateTokens(messages);

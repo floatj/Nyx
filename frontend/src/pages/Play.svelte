@@ -406,8 +406,20 @@
         </div>
       {/if}
 
-      <!-- Game Over -->
-      {#if $isGameOver && !$settingsStore.isBossMode}
+      <!-- Character Death Screen -->
+      {#if $gameStore.characterStatusEnabled && $gameStore.characterStatus?.health === 0 && !$settingsStore.isBossMode}
+        <div class="max-w-screen-md mx-auto px-4 mt-4">
+          <div class="bg-red-900/90 border-2 border-red-500 rounded-lg p-8 text-center shadow-2xl">
+            <div class="text-6xl mb-4 animate-pulse">💀</div>
+            <h3 class="text-3xl font-bold text-red-100 mb-3">You Have Died</h3>
+            <p class="text-red-200 mb-6">Your journey has come to a tragic end.</p>
+            <button class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium shadow-lg hover:shadow-xl" on:click={resetGame}>
+              Start New Adventure
+            </button>
+          </div>
+        </div>
+      {:else if $isGameOver && !$settingsStore.isBossMode}
+        <!-- Regular Game Over -->
         <div class="max-w-screen-md mx-auto px-4 mt-4">
           <div class="bg-indigo-100 dark:bg-indigo-900/50 border border-indigo-400 dark:border-indigo-500 rounded-lg p-6 text-center">
             <h3 class="text-2xl font-bold mb-3">🎭 The End</h3>
@@ -420,7 +432,7 @@
       {/if}
 
       <!-- Footer Actions -->
-      {#if !$isGameOver && !$hasError && !$settingsStore.isBossMode}
+      {#if !$isGameOver && !$hasError && !($gameStore.characterStatus?.health === 0) && !$settingsStore.isBossMode}
         <div class="max-w-screen-md mx-auto px-4 mt-8">
           <div class="flex justify-center gap-3">
             <button

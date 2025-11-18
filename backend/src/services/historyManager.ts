@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import type { Message, GameMode, LLMOutput } from '../types/index.js';
+import type { Message, GameMode, LLMOutput, CharacterStatus } from '../types/index.js';
 
 const KEEP_RECENT_TURNS = 8;
 const MAX_TOTAL_TURNS = 15;
@@ -29,16 +29,31 @@ export class HistoryManager {
   async prepareMessages(
     systemPrompt: string,
     fullHistory: Message[],
-    mode: GameMode
+    mode: GameMode,
+    characterStatusEnabled: boolean = true
   ): Promise<Message[]> {
     const turnCount = this.countTurns(fullHistory);
 
     // Convert all messages to API-compatible format (content must be string)
     const normalizedHistory = this.normalizeMessages(fullHistory);
 
+    // Find last known character status to preserve context
+    const lastStatus = characterStatusEnabled ? this.findLastCharacterStatus(fullHistory) : null;
+
+    // Build base messages
+    const baseMessages: Message[] = [{ role: 'system', content: systemPrompt }];
+
+    // Add character status context if available
+    if (lastStatus) {
+      baseMessages.push({
+        role: 'system',
+        content: `IMPORTANT: Current character status is: ${JSON.stringify(lastStatus)}. Continue tracking from these values and update based on story events.`,
+      });
+    }
+
     // Early return if history is short
     if (turnCount <= this.config.recentTurnLimit) {
-      return [{ role: 'system', content: systemPrompt }, ...normalizedHistory];
+      return [...baseMessages, ...normalizedHistory];
     }
 
     // Split history
@@ -48,17 +63,34 @@ export class HistoryManager {
 
     // Strategy A: Simple truncation (fast, loses context)
     if (!this.config.enableSummarization) {
-      return [{ role: 'system', content: systemPrompt }, ...recentHistory];
+      return [...baseMessages, ...recentHistory];
     }
 
     // Strategy B: Summarization (better quality, costs tokens)
     const summary = await this.summarizeHistory(olderHistory, mode);
 
     return [
-      { role: 'system', content: systemPrompt },
+      ...baseMessages,
       { role: 'system', content: `Story so far: ${summary}` },
       ...recentHistory,
     ];
+  }
+
+  /**
+   * Find the most recent character status from message history
+   */
+  private findLastCharacterStatus(history: Message[]): CharacterStatus | null {
+    // Iterate backwards through history to find latest status
+    for (let i = history.length - 1; i >= 0; i--) {
+      const msg = history[i];
+      if (msg.role === 'assistant' && typeof msg.content === 'object') {
+        const output = msg.content as LLMOutput;
+        if (output.characterStatus) {
+          return output.characterStatus;
+        }
+      }
+    }
+    return null;
   }
 
   /**
