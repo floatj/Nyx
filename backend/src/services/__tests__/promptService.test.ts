@@ -46,8 +46,44 @@ describe('PromptService', () => {
       expect(prompt).toContain('butterfly effects');
     });
 
+    it('should build system prompt for software_engineer mode', () => {
+      const prompt = promptService.buildSystemPrompt('software_engineer');
+
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain('Modern tech company office');
+      expect(prompt).toContain('afternoon slump');
+      expect(prompt).toContain('procrastination');
+    });
+
+    it('should build system prompt for bl_story mode', () => {
+      const prompt = promptService.buildSystemPrompt('bl_story');
+
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain('Modern contemporary setting');
+      expect(prompt).toContain('Growing attraction');
+      expect(prompt).toContain('two male characters');
+    });
+
+    it('should build system prompt for gl_story mode', () => {
+      const prompt = promptService.buildSystemPrompt('gl_story');
+
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain('Modern contemporary setting');
+      expect(prompt).toContain('Growing attraction');
+      expect(prompt).toContain('two female characters');
+    });
+
+    it('should build system prompt for alien_defense mode', () => {
+      const prompt = promptService.buildSystemPrompt('alien_defense');
+
+      expect(prompt).toContain('text RPG engine');
+      expect(prompt).toContain('Near-future Earth');
+      expect(prompt).toContain('alien invasion');
+      expect(prompt).toContain('military tactics');
+    });
+
     it('should include safety guidelines in all prompts', () => {
-      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler'];
+      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler' | 'software_engineer' | 'bl_story' | 'gl_story' | 'alien_defense'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler', 'software_engineer', 'bl_story', 'gl_story', 'alien_defense'];
 
       for (const mode of modes) {
         const prompt = promptService.buildSystemPrompt(mode);
@@ -121,6 +157,38 @@ describe('PromptService', () => {
       expect(prompt).toContain('message from the future');
       expect(prompt).toContain('temporal device');
       expect(prompt).toContain('72 hours');
+    });
+
+    it('should build initial prompt for software_engineer mode', () => {
+      const prompt = promptService.buildInitialPrompt('software_engineer');
+
+      expect(prompt).toContain('software engineer');
+      expect(prompt).toContain('drowsy afternoon');
+      expect(prompt).toContain('2 PM');
+    });
+
+    it('should build initial prompt for bl_story mode', () => {
+      const prompt = promptService.buildInitialPrompt('bl_story');
+
+      expect(prompt).toContain('new chapter');
+      expect(prompt).toContain('unexpectedly meet someone');
+      expect(prompt).toContain('butterflies');
+    });
+
+    it('should build initial prompt for gl_story mode', () => {
+      const prompt = promptService.buildInitialPrompt('gl_story');
+
+      expect(prompt).toContain('new chapter');
+      expect(prompt).toContain('unexpectedly meet someone');
+      expect(prompt).toContain('butterflies');
+    });
+
+    it('should build initial prompt for alien_defense mode', () => {
+      const prompt = promptService.buildInitialPrompt('alien_defense');
+
+      expect(prompt).toContain('military commander');
+      expect(prompt).toContain('alarms blare');
+      expect(prompt).toContain('First contact');
     });
 
     it('should build initial prompt for custom mode with language reminder', () => {
@@ -301,6 +369,48 @@ That should work!`;
       expect(status.inventory).toContain('emergency beacon');
     });
 
+    it('should initialize character status for software_engineer mode', () => {
+      const status = getInitialCharacterStatus('software_engineer');
+
+      expect(status.health).toBe(100);
+      expect(status.stamina).toBe(60);
+      expect(status.inventory).toContain('laptop');
+      expect(status.inventory).toContain('coffee mug');
+      expect(status.inventory).toContain('noise-canceling headphones');
+      expect(status.inventory).toContain('phone');
+    });
+
+    it('should initialize character status for bl_story mode', () => {
+      const status = getInitialCharacterStatus('bl_story');
+
+      expect(status.health).toBe(100);
+      expect(status.stamina).toBe(100);
+      expect(status.inventory).toContain('phone');
+      expect(status.inventory).toContain('wallet');
+      expect(status.inventory).toContain('keys');
+    });
+
+    it('should initialize character status for gl_story mode', () => {
+      const status = getInitialCharacterStatus('gl_story');
+
+      expect(status.health).toBe(100);
+      expect(status.stamina).toBe(100);
+      expect(status.inventory).toContain('phone');
+      expect(status.inventory).toContain('wallet');
+      expect(status.inventory).toContain('keys');
+    });
+
+    it('should initialize character status for alien_defense mode', () => {
+      const status = getInitialCharacterStatus('alien_defense');
+
+      expect(status.health).toBe(100);
+      expect(status.stamina).toBe(100);
+      expect(status.inventory).toContain('command tablet');
+      expect(status.inventory).toContain('security clearance');
+      expect(status.inventory).toContain('communication device');
+      expect(status.inventory).toContain('sidearm');
+    });
+
     it('should initialize character status for custom mode', () => {
       const status = getInitialCharacterStatus('custom');
 
@@ -310,12 +420,16 @@ That should work!`;
     });
 
     it('should initialize all conditions as false for most modes', () => {
-      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'custom' | 'time_traveler'> = [
+      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'custom' | 'time_traveler' | 'software_engineer' | 'bl_story' | 'gl_story' | 'alien_defense'> = [
         'dungeon',
         'journey',
         'mystery',
         'custom',
         'time_traveler',
+        'software_engineer',
+        'bl_story',
+        'gl_story',
+        'alien_defense',
       ];
 
       for (const mode of modes) {
@@ -483,7 +597,7 @@ That should work!`;
     });
 
     it('should work for all modes when character status is disabled', () => {
-      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler'];
+      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler' | 'software_engineer' | 'bl_story' | 'gl_story' | 'alien_defense'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler', 'software_engineer', 'bl_story', 'gl_story', 'alien_defense'];
 
       for (const mode of modes) {
         const prompt = promptService.buildSystemPrompt(mode, undefined, false);
@@ -522,7 +636,7 @@ That should work!`;
     });
 
     it('should work for all modes when character status is disabled', () => {
-      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler'];
+      const modes: Array<'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler' | 'software_engineer' | 'bl_story' | 'gl_story' | 'alien_defense'> = ['dungeon', 'journey', 'mystery', 'magical_girl', 'time_traveler', 'software_engineer', 'bl_story', 'gl_story', 'alien_defense'];
 
       for (const mode of modes) {
         const prompt = promptService.buildInitialPrompt(mode, undefined, false);

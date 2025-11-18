@@ -13,7 +13,7 @@ export type GameState =
   | 'error_fatal'
   | 'game_over';
 
-export type GameMode = 'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler' | 'custom';
+export type GameMode = 'dungeon' | 'journey' | 'mystery' | 'magical_girl' | 'time_traveler' | 'software_engineer' | 'bl_story' | 'gl_story' | 'alien_defense' | 'custom';
 export type MessageRole = 'system' | 'assistant' | 'user';
 
 export interface Choice {
