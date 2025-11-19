@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { openRouterClient } from '../services/openRouterClient.js';
+import { llmProvider } from '../services/llmProviderFactory.js';
 import { promptService } from '../services/promptService.js';
 import { historyManager } from '../services/historyManager.js';
 import { sessionManager } from '../services/sessionManager.js';
@@ -93,8 +93,8 @@ router.post('/', async (req: Request, res: Response) => {
     let tokenCount = 0;
 
     try {
-      // Stream from OpenRouter
-      for await (const chunk of openRouterClient.streamCompletion({
+      // Stream from LLM provider
+      for await (const chunk of llmProvider.streamCompletion({
         model: playRequest.model || process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
         messages,
         temperature: playRequest.temperature,

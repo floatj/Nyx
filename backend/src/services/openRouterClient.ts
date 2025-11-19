@@ -1,5 +1,11 @@
 import 'dotenv/config';
 import type { Message } from '../types/index.js';
+import type {
+  ILLMProvider,
+  CompletionParams,
+  StreamCompletionParams,
+  LLMResponse,
+} from './llmProvider.js';
 import { modelConfigService } from './modelConfigService.js';
 
 export interface OpenRouterStreamChunk {
@@ -33,7 +39,7 @@ export interface OpenRouterResponse {
   };
 }
 
-export class OpenRouterClient {
+export class OpenRouterClient implements ILLMProvider {
   private apiKey: string;
   private baseUrl = 'https://openrouter.ai/api/v1';
 
@@ -48,12 +54,9 @@ export class OpenRouterClient {
    * Stream completion from OpenRouter
    * Returns an async generator that yields content chunks
    */
-  async *streamCompletion(params: {
-    model: string;
-    messages: Message[];
-    temperature?: number;
-    max_tokens?: number;
-  }): AsyncGenerator<string, void, unknown> {
+  async *streamCompletion(
+    params: StreamCompletionParams,
+  ): AsyncGenerator<string, void, unknown> {
     const modelId = params.model || modelConfigService.getDefaultModelId();
 
     // Get model-specific configuration
@@ -184,13 +187,7 @@ export class OpenRouterClient {
   /**
    * Non-streaming completion (fallback)
    */
-  async complete(params: {
-    model: string;
-    messages: Message[];
-    temperature?: number;
-    max_tokens?: number;
-    json_output?: boolean;
-  }): Promise<OpenRouterResponse> {
+  async complete(params: CompletionParams): Promise<LLMResponse> {
     const modelId = params.model || modelConfigService.getDefaultModelId();
 
     // Get model-specific configuration
