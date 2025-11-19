@@ -379,12 +379,14 @@
               </option>
             {/each}
           </select>
-          {@const currentModel = availableModels.find(m => m.id === ($gameStore.selectedModel || $settingsStore.defaultModel))}
-          {#if currentModel}
-            <span class="text-xs text-gray-500 dark:text-gray-400">
-              {currentModel.description} | Max: {currentModel.max_tokens} tokens
-            </span>
-          {/if}
+          {#key $gameStore.selectedModel || $settingsStore.defaultModel}
+            {@const currentModel = availableModels.find(m => m.id === ($gameStore.selectedModel || $settingsStore.defaultModel))}
+            {#if currentModel}
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                {currentModel.description} | Max: {currentModel.max_tokens} tokens
+              </span>
+            {/if}
+          {/key}
         </div>
       {/if}
     </div>

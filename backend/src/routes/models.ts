@@ -46,10 +46,12 @@ router.get('/recommended', async (req: Request, res: Response) => {
 /**
  * GET /api/models/:modelId
  * Get specific model configuration
+ * Note: modelId can contain slashes (e.g., google/gemini-2.5-pro)
  */
-router.get('/:modelId(*)', async (req: Request, res: Response) => {
+router.get('/*', async (req: Request, res: Response) => {
   try {
-    const modelId = req.params.modelId;
+    // Remove leading slash and 'models/' prefix if present
+    const modelId = req.path.replace(/^\//, '');
     const model = modelConfigService.getModelById(modelId);
 
     if (!model) {
