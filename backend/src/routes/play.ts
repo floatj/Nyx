@@ -4,6 +4,7 @@ import { openRouterClient } from '../services/openRouterClient.js';
 import { promptService } from '../services/promptService.js';
 import { historyManager } from '../services/historyManager.js';
 import { sessionManager } from '../services/sessionManager.js';
+import { modelConfigService } from '../services/modelConfigService.js';
 import type { PlayRequest } from '../types/index.js';
 
 const router = Router();
@@ -44,7 +45,11 @@ router.post('/', async (req: Request, res: Response) => {
     );
 
     const estimatedTokens = historyManager.estimateTokens(messages);
-    const maxCompletionTokens = playRequest.max_tokens || 2000; // Increased from 600 to 2000 for better model compatibility
+
+    // Get model-specific max_tokens or use provided value
+    const selectedModel = playRequest.model || modelConfigService.getDefaultModelId();
+    const modelMaxTokens = modelConfigService.getMaxTokens(selectedModel);
+    const maxCompletionTokens = playRequest.max_tokens || modelMaxTokens;
 
     if (!sessionManager.hasTokenBudget(playRequest.sessionId, estimatedTokens + maxCompletionTokens)) {
       return res.status(429).json({

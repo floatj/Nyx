@@ -54,6 +54,7 @@ export type GameEvent =
   | { type: 'SET_CUSTOM_PROMPT'; prompt: string }
   | { type: 'SET_CHARACTER_STATUS_ENABLED'; enabled: boolean }
   | { type: 'SET_CUSTOM_CHARACTER_STATUS'; status: CharacterStatus }
+  | { type: 'SET_SELECTED_MODEL'; modelId: string | undefined }
   | { type: 'START_GAME' }
   | { type: 'SESSION_READY'; sessionId: string; token: string }
   | { type: 'STREAM_START' }
@@ -85,6 +86,7 @@ interface GameStoreState {
   tokenUsed: number;
   characterStatus: CharacterStatus | null;
   characterStatusEnabled: boolean;
+  selectedModel: string | undefined; // Model selected for this session
 }
 
 // Valid state transitions
@@ -92,6 +94,7 @@ const VALID_TRANSITIONS: Record<GameState, Partial<Record<GameEvent['type'], Gam
   uninitialized: {
     SELECT_MODE: 'mode_selection',
     SET_CHARACTER_STATUS_ENABLED: 'uninitialized',
+    SET_SELECTED_MODEL: 'uninitialized',
     ERROR: 'error_recoverable',
     RESET: 'uninitialized',
   },
@@ -99,6 +102,7 @@ const VALID_TRANSITIONS: Record<GameState, Partial<Record<GameEvent['type'], Gam
     SET_CUSTOM_PROMPT: 'mode_selection',
     SET_CHARACTER_STATUS_ENABLED: 'mode_selection',
     SET_CUSTOM_CHARACTER_STATUS: 'mode_selection',
+    SET_SELECTED_MODEL: 'mode_selection',
     START_GAME: 'starting',
     RESET: 'uninitialized',
   },
@@ -118,6 +122,7 @@ const VALID_TRANSITIONS: Record<GameState, Partial<Record<GameEvent['type'], Gam
     SELECT_CHOICE: 'processing_input',
     SELECT_CUSTOM_CHOICE: 'processing_input',
     INPUT_SUBMITTED: 'processing_input',
+    SET_SELECTED_MODEL: 'awaiting_choice',
     PAUSE: 'paused',
     END_GAME: 'game_over',
     RESET: 'uninitialized',
@@ -159,6 +164,7 @@ const initialState: GameStoreState = {
   tokenUsed: 0,
   characterStatus: null,
   characterStatusEnabled: true, // Default to enabled
+  selectedModel: undefined, // Will use default from settings
 };
 
 function createGameStore() {
@@ -206,6 +212,12 @@ function createGameStore() {
               ...state,
               customInitialCharacterStatus: event.status,
               characterStatus: event.status, // Also set as current status
+            };
+
+          case 'SET_SELECTED_MODEL':
+            return {
+              ...state,
+              selectedModel: event.modelId,
             };
 
           case 'START_GAME':

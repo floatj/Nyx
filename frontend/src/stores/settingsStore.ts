@@ -7,6 +7,7 @@ export interface SettingsState {
   bossKeyEnabled: boolean;
   isBossMode: boolean;
   language: Language;
+  defaultModel?: string; // Default model ID for new sessions
 }
 
 const SETTINGS_STORAGE_KEY = 'nyx_settings';
@@ -14,7 +15,7 @@ const SETTINGS_STORAGE_KEY = 'nyx_settings';
 // Load settings from localStorage
 function loadSettings(): SettingsState {
   if (typeof window === 'undefined') {
-    return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en' };
+    return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en', defaultModel: undefined };
   }
 
   try {
@@ -27,6 +28,7 @@ function loadSettings(): SettingsState {
         bossKeyEnabled: parsed.bossKeyEnabled ?? false,
         isBossMode: false, // Always start with boss mode off
         language: (parsed.language ?? 'en') as Language,
+        defaultModel: parsed.defaultModel,
       };
       console.log('[SettingsStore] Loaded settings:', settings);
       return settings;
@@ -36,7 +38,7 @@ function loadSettings(): SettingsState {
   }
 
   console.log('[SettingsStore] Using default settings');
-  return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en' };
+  return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en', defaultModel: undefined };
 }
 
 // Save settings to localStorage
@@ -49,6 +51,7 @@ function saveSettings(settings: SettingsState): void {
       darkMode: settings.darkMode,
       bossKeyEnabled: settings.bossKeyEnabled,
       language: settings.language,
+      defaultModel: settings.defaultModel,
     };
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(toSave));
   } catch (error) {
@@ -114,6 +117,14 @@ function createSettingsStore() {
     setLanguage: (language: Language) => {
       update((state) => {
         const newState = { ...state, language };
+        saveSettings(newState);
+        return newState;
+      });
+    },
+
+    setDefaultModel: (modelId: string | undefined) => {
+      update((state) => {
+        const newState = { ...state, defaultModel: modelId };
         saveSettings(newState);
         return newState;
       });

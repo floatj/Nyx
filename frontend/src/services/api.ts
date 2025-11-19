@@ -9,6 +9,27 @@ export interface SessionResponse {
   expiresIn: number;
 }
 
+export interface ModelCapabilities {
+  streaming: boolean;
+  json_mode: boolean;
+}
+
+export interface ModelConfig {
+  id: string;
+  name: string;
+  provider: string;
+  max_tokens: number;
+  temperature: number;
+  description: string;
+  recommended: boolean;
+  capabilities: ModelCapabilities;
+}
+
+export interface ModelsResponse {
+  models: ModelConfig[];
+  defaultModel: string;
+}
+
 export interface PlayRequest {
   sessionId: string;
   mode: GameMode;
@@ -159,6 +180,47 @@ export class ApiService {
 
     const data = await response.json();
     return data.prompt;
+  }
+
+  /**
+   * Get all available models
+   */
+  async getModels(): Promise<ModelsResponse> {
+    const response = await fetch(`${API_URL}/api/models`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch models: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get recommended models
+   */
+  async getRecommendedModels(): Promise<ModelConfig[]> {
+    const response = await fetch(`${API_URL}/api/models/recommended`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch recommended models: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.models;
+  }
+
+  /**
+   * Get specific model configuration
+   */
+  async getModelById(modelId: string): Promise<ModelConfig> {
+    const response = await fetch(`${API_URL}/api/models/${encodeURIComponent(modelId)}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch model: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.model;
   }
 }
 

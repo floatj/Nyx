@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { gameStore, hasError, isGameOver } from '../stores/gameStore';
   import { settingsStore } from '../stores/settingsStore';
-  import { apiService } from '../services/api';
+  import { apiService, type ModelConfig } from '../services/api';
   import SaveSlotModal from '../components/SaveSlotModal.svelte';
   import GameSettingsModal from '../components/GameSettingsModal.svelte';
   import StoryPane from '../components/StoryPane.svelte';
@@ -42,6 +42,23 @@
   let isGeneratingPrompt = false;
   let isOptimizingPrompt = false;
   let currentPage: 'home' | 'settings' = 'home';
+  let availableModels: ModelConfig[] = [];
+  let showModelSelector = false;
+
+  // Load available models
+  onMount(async () => {
+    try {
+      const modelsResponse = await apiService.getModels();
+      availableModels = modelsResponse.models;
+
+      // Initialize selected model from settings if not already set
+      if (!$gameStore.selectedModel && $settingsStore.defaultModel) {
+        gameStore.dispatch({ type: 'SET_SELECTED_MODEL', modelId: $settingsStore.defaultModel });
+      }
+    } catch (error) {
+      console.error('Failed to load models:', error);
+    }
+  });
 
   // Boss key listener
   onMount(() => {
@@ -122,6 +139,7 @@
         player_input: $gameStore.history.length > 0 ? ($gameStore.history[$gameStore.history.length - 1].content as string) : '',
         characterStatusEnabled: $gameStore.characterStatusEnabled,
         language: $settingsStore.language,
+        model: $gameStore.selectedModel || $settingsStore.defaultModel,
       };
 
       for await (const event of apiService.playTurn(playRequest)) {
@@ -308,6 +326,12 @@
   function navigateToHome() {
     currentPage = 'home';
   }
+
+  function handleModelChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const value = target.value === '' ? undefined : target.value;
+    gameStore.dispatch({ type: 'SET_SELECTED_MODEL', modelId: value });
+  }
 </script>
 
 {#if currentPage === 'settings'}
@@ -316,28 +340,53 @@
 <div class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
   <!-- Header -->
   <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 transition-colors">
-    <div class="max-w-screen-lg mx-auto px-4 py-4 flex justify-between items-center">
-      <button
-        on:click={navigateToHome}
-        class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer"
-      >
-        {$settingsStore.isBossMode ? $t('app.bossTitle') : $t('app.title')}
-      </button>
-      <div class="flex items-center gap-3">
-        {#if $gameStore.sessionId}
-          <div class="w-64">
-            <TokenMeter used={$gameStore.tokenUsed} budget={tokenBudget} />
-          </div>
-        {/if}
-        {#if !$settingsStore.isBossMode}
-          <button
-            on:click={navigateToSettings}
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm font-medium"
-          >
-            ⚙️ {$t('common.settings')}
-          </button>
-        {/if}
+    <div class="max-w-screen-lg mx-auto px-4 py-4">
+      <div class="flex justify-between items-center mb-2">
+        <button
+          on:click={navigateToHome}
+          class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer"
+        >
+          {$settingsStore.isBossMode ? $t('app.bossTitle') : $t('app.title')}
+        </button>
+        <div class="flex items-center gap-3">
+          {#if $gameStore.sessionId}
+            <div class="w-64">
+              <TokenMeter used={$gameStore.tokenUsed} budget={tokenBudget} />
+            </div>
+          {/if}
+          {#if !$settingsStore.isBossMode}
+            <button
+              on:click={navigateToSettings}
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm font-medium"
+            >
+              ⚙️ {$t('common.settings')}
+            </button>
+          {/if}
+        </div>
       </div>
+      <!-- Model Selector -->
+      {#if availableModels.length > 0 && ($gameStore.state === 'mode_selection' || $gameStore.state === 'awaiting_choice' || $gameStore.sessionId)}
+        <div class="flex items-center gap-2 text-sm">
+          <label class="text-gray-600 dark:text-gray-400 font-medium">AI Model:</label>
+          <select
+            value={$gameStore.selectedModel || $settingsStore.defaultModel || ''}
+            on:change={handleModelChange}
+            class="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors text-sm"
+          >
+            {#each availableModels as model}
+              <option value={model.id}>
+                {model.name} ({model.provider}) {model.recommended ? '⭐' : ''}
+              </option>
+            {/each}
+          </select>
+          {@const currentModel = availableModels.find(m => m.id === ($gameStore.selectedModel || $settingsStore.defaultModel))}
+          {#if currentModel}
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+              {currentModel.description} | Max: {currentModel.max_tokens} tokens
+            </span>
+          {/if}
+        </div>
+      {/if}
     </div>
   </header>
 

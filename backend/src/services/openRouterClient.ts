@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import type { Message } from '../types/index.js';
+import { modelConfigService } from './modelConfigService.js';
 
 export interface OpenRouterStreamChunk {
   id: string;
@@ -53,18 +54,23 @@ export class OpenRouterClient {
     temperature?: number;
     max_tokens?: number;
   }): AsyncGenerator<string, void, unknown> {
+    const modelId = params.model || modelConfigService.getDefaultModelId();
+
+    // Get model-specific configuration
+    const modelMaxTokens = modelConfigService.getMaxTokens(modelId);
+    const modelTemperature = modelConfigService.getTemperature(modelId);
+    const supportsJsonMode = modelConfigService.supportsJsonMode(modelId);
+
     const requestBody: any = {
-      model: params.model || 'anthropic/claude-3-haiku',
+      model: modelId,
       messages: params.messages,
-      temperature: params.temperature ?? 0.7,
-      max_tokens: params.max_tokens ?? 2000, // Increased from 600 to 2000 for longer responses
+      temperature: params.temperature ?? modelTemperature,
+      max_tokens: params.max_tokens ?? modelMaxTokens,
       stream: true,
     };
 
-    // Only add response_format for models that support it
-    // Gemini models may not handle this well, so we make it conditional
-    const model = requestBody.model.toLowerCase();
-    if (model.includes('anthropic') || model.includes('claude') || model.includes('gpt')) {
+    // Only add response_format for models that support JSON mode
+    if (supportsJsonMode) {
       requestBody.response_format = { type: 'json_object' };
     }
 
@@ -185,21 +191,24 @@ export class OpenRouterClient {
     max_tokens?: number;
     json_output?: boolean;
   }): Promise<OpenRouterResponse> {
+    const modelId = params.model || modelConfigService.getDefaultModelId();
+
+    // Get model-specific configuration
+    const modelMaxTokens = modelConfigService.getMaxTokens(modelId);
+    const modelTemperature = modelConfigService.getTemperature(modelId);
+    const supportsJsonMode = modelConfigService.supportsJsonMode(modelId);
+
     const bodyParams: any = {
-      model: params.model || 'anthropic/claude-3-haiku',
+      model: modelId,
       messages: params.messages,
-      temperature: params.temperature ?? 0.7,
-      max_tokens: params.max_tokens ?? 2000, // Increased from 600 to 2000 for longer responses
+      temperature: params.temperature ?? modelTemperature,
+      max_tokens: params.max_tokens ?? modelMaxTokens,
       stream: false,
     };
 
-    // Only add response_format if json_output is explicitly true
-    // and the model supports it (skip for Gemini and other models that may not handle it)
-    if (params.json_output) {
-      const model = bodyParams.model.toLowerCase();
-      if (model.includes('anthropic') || model.includes('claude') || model.includes('gpt')) {
-        bodyParams.response_format = { type: 'json_object' };
-      }
+    // Only add response_format if json_output is explicitly true and model supports it
+    if (params.json_output && supportsJsonMode) {
+      bodyParams.response_format = { type: 'json_object' };
     }
 
     // Log full request details before sending
