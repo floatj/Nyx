@@ -53,14 +53,20 @@ export class OpenRouterClient {
     temperature?: number;
     max_tokens?: number;
   }): AsyncGenerator<string, void, unknown> {
-    const requestBody = {
+    const requestBody: any = {
       model: params.model || 'anthropic/claude-3-haiku',
       messages: params.messages,
       temperature: params.temperature ?? 0.7,
-      max_tokens: params.max_tokens ?? 600,
+      max_tokens: params.max_tokens ?? 2000, // Increased from 600 to 2000 for longer responses
       stream: true,
-      response_format: { type: 'json_object' }, // Force JSON output
     };
+
+    // Only add response_format for models that support it
+    // Gemini models may not handle this well, so we make it conditional
+    const model = requestBody.model.toLowerCase();
+    if (model.includes('anthropic') || model.includes('claude') || model.includes('gpt')) {
+      requestBody.response_format = { type: 'json_object' };
+    }
 
     // Log full request details before sending
     console.log('=== OpenRouter API Stream Request ===');
@@ -183,13 +189,17 @@ export class OpenRouterClient {
       model: params.model || 'anthropic/claude-3-haiku',
       messages: params.messages,
       temperature: params.temperature ?? 0.7,
-      max_tokens: params.max_tokens ?? 600,
+      max_tokens: params.max_tokens ?? 2000, // Increased from 600 to 2000 for longer responses
       stream: false,
     };
 
     // Only add response_format if json_output is explicitly true
+    // and the model supports it (skip for Gemini and other models that may not handle it)
     if (params.json_output) {
-      bodyParams.response_format = { type: 'json_object' };
+      const model = bodyParams.model.toLowerCase();
+      if (model.includes('anthropic') || model.includes('claude') || model.includes('gpt')) {
+        bodyParams.response_format = { type: 'json_object' };
+      }
     }
 
     // Log full request details before sending

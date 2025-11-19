@@ -44,7 +44,7 @@ router.post('/', async (req: Request, res: Response) => {
     );
 
     const estimatedTokens = historyManager.estimateTokens(messages);
-    const maxCompletionTokens = playRequest.max_tokens || 600;
+    const maxCompletionTokens = playRequest.max_tokens || 2000; // Increased from 600 to 2000 for better model compatibility
 
     if (!sessionManager.hasTokenBudget(playRequest.sessionId, estimatedTokens + maxCompletionTokens)) {
       return res.status(429).json({
