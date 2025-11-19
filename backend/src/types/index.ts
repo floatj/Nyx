@@ -48,6 +48,7 @@ export interface PlayRequest {
   temperature?: number;
   max_tokens?: number;
   characterStatusEnabled?: boolean;
+  language?: 'en' | 'zh-TW';
 }
 
 export interface Session {

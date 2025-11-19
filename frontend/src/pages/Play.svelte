@@ -14,6 +14,7 @@
   import type { GameMode } from '../stores/gameStore';
   import type { SaveSlot } from '../services/storage';
   import { settingsService } from '../services/settings';
+  import { t } from '../i18n';
 
   let tokenBudget = 20000;
   let selectedMode: GameMode | null = null;
@@ -120,6 +121,7 @@
         history: $gameStore.history,
         player_input: $gameStore.history.length > 0 ? ($gameStore.history[$gameStore.history.length - 1].content as string) : '',
         characterStatusEnabled: $gameStore.characterStatusEnabled,
+        language: $settingsStore.language,
       };
 
       for await (const event of apiService.playTurn(playRequest)) {
@@ -319,7 +321,7 @@
         on:click={navigateToHome}
         class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer"
       >
-        {$settingsStore.isBossMode ? 'Claude Code Web (Research preview)' : 'Project Nyx'}
+        {$settingsStore.isBossMode ? $t('app.bossTitle') : $t('app.title')}
       </button>
       <div class="flex items-center gap-3">
         {#if $gameStore.sessionId}
@@ -332,7 +334,7 @@
             on:click={navigateToSettings}
             class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm font-medium"
           >
-            ⚙️ Settings
+            ⚙️ {$t('common.settings')}
           </button>
         {/if}
       </div>
@@ -344,8 +346,8 @@
       <!-- Mode Selection -->
       <div class="max-w-screen-md mx-auto px-4">
         <div class="text-center mb-8">
-          <h2 class="text-3xl font-bold mb-4">Choose Your Adventure</h2>
-          <p class="text-gray-500 dark:text-gray-400">Select a game mode to begin your journey</p>
+          <h2 class="text-3xl font-bold mb-4">{$t('modeSelection.title')}</h2>
+          <p class="text-gray-500 dark:text-gray-400">{$t('modeSelection.subtitle')}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -354,9 +356,9 @@
             on:click={() => showGameSettings('dungeon')}
           >
             <div class="text-4xl mb-3">🏰</div>
-            <h3 class="text-xl font-bold mb-2">Dungeon Crawl</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.dungeon.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Explore dark catacombs filled with monsters, traps, and treasure
+              {$t('modeSelection.modes.dungeon.description')}
             </p>
           </button>
 
@@ -365,9 +367,9 @@
             on:click={() => showGameSettings('journey')}
           >
             <div class="text-4xl mb-3">⚔️</div>
-            <h3 class="text-xl font-bold mb-2">Hero's Journey</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.journey.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Embark on an epic quest with companions and moral choices
+              {$t('modeSelection.modes.journey.description')}
             </p>
           </button>
 
@@ -376,9 +378,9 @@
             on:click={() => showGameSettings('mystery')}
           >
             <div class="text-4xl mb-3">🔍</div>
-            <h3 class="text-xl font-bold mb-2">Mystery Night</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.mystery.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Solve a noir crime with clues, suspects, and time pressure
+              {$t('modeSelection.modes.mystery.description')}
             </p>
           </button>
 
@@ -387,9 +389,9 @@
             on:click={() => showGameSettings('magical_girl')}
           >
             <div class="text-4xl mb-3">🌟</div>
-            <h3 class="text-xl font-bold mb-2">Magical Girl Battle</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.magical_girl.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Transform and fight dark forces with magical powers and friendship
+              {$t('modeSelection.modes.magical_girl.description')}
             </p>
           </button>
 
@@ -398,9 +400,9 @@
             on:click={() => showGameSettings('time_traveler')}
           >
             <div class="text-4xl mb-3">⏰</div>
-            <h3 class="text-xl font-bold mb-2">Time Traveler</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.time_traveler.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Jump through time to prevent world-ending paradoxes and save reality
+              {$t('modeSelection.modes.time_traveler.description')}
             </p>
           </button>
 
@@ -409,9 +411,9 @@
             on:click={() => showGameSettings('software_engineer')}
           >
             <div class="text-4xl mb-3">💻</div>
-            <h3 class="text-xl font-bold mb-2">Lazy Office Day</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.software_engineer.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Survive the afternoon slump as a software engineer trying to look busy
+              {$t('modeSelection.modes.software_engineer.description')}
             </p>
           </button>
 
@@ -420,9 +422,9 @@
             on:click={() => showGameSettings('bl_story')}
           >
             <div class="text-4xl mb-3">💙</div>
-            <h3 class="text-xl font-bold mb-2">Boys-Love Story</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.bl_story.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Experience a heartfelt romance between two male characters
+              {$t('modeSelection.modes.bl_story.description')}
             </p>
           </button>
 
@@ -431,9 +433,9 @@
             on:click={() => showGameSettings('gl_story')}
           >
             <div class="text-4xl mb-3">💖</div>
-            <h3 class="text-xl font-bold mb-2">Girls-Love Story</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.gl_story.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Experience a heartfelt romance between two female characters
+              {$t('modeSelection.modes.gl_story.description')}
             </p>
           </button>
 
@@ -442,9 +444,9 @@
             on:click={() => showGameSettings('alien_defense')}
           >
             <div class="text-4xl mb-3">🛸</div>
-            <h3 class="text-xl font-bold mb-2">Alien Defense</h3>
+            <h3 class="text-xl font-bold mb-2">{$t('modeSelection.modes.alien_defense.name')}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Command Earth's forces against an alien invasion threatening humanity
+              {$t('modeSelection.modes.alien_defense.description')}
             </p>
           </button>
 
@@ -453,9 +455,9 @@
             on:click={openCustomPromptModal}
           >
             <div class="text-4xl mb-3">✨</div>
-            <h3 class="text-xl font-bold mb-2 text-white">Custom Adventure</h3>
+            <h3 class="text-xl font-bold mb-2 text-white">{$t('modeSelection.modes.custom.name')}</h3>
             <p class="text-sm text-purple-50 dark:text-gray-300">
-              Create your own story with a custom prompt
+              {$t('modeSelection.modes.custom.description')}
             </p>
           </button>
         </div>
@@ -466,7 +468,7 @@
             class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
             on:click={openLoadModal}
           >
-            📂 Load Saved Game
+            📂 {$t('common.loadSavedGame')}
           </button>
         </div>
       </div>
@@ -507,14 +509,14 @@
         <div class="max-w-screen-md mx-auto px-4 mt-4">
           <div class="bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-500 rounded-lg p-4">
             <p class="text-red-800 dark:text-red-200 mb-3">
-              ⚠️ Error: {$gameStore.error?.message || 'Something went wrong'}
+              ⚠️ {$t('common.error')}: {$gameStore.error?.message || $t('errors.generic')}
             </p>
             <div class="flex gap-3">
               <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors" on:click={retryAfterError}>
-                Retry
+                {$t('common.retry')}
               </button>
               <button class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors" on:click={resetGame}>
-                Start Over
+                {$t('common.startOver')}
               </button>
             </div>
           </div>
@@ -526,10 +528,10 @@
         <div class="max-w-screen-md mx-auto px-4 mt-4">
           <div class="bg-red-900/90 border-2 border-red-500 rounded-lg p-8 text-center shadow-2xl">
             <div class="text-6xl mb-4 animate-pulse">💀</div>
-            <h3 class="text-3xl font-bold text-red-100 mb-3">You Have Died</h3>
-            <p class="text-red-200 mb-6">Your journey has come to a tragic end.</p>
+            <h3 class="text-3xl font-bold text-red-100 mb-3">{$t('gameOver.death.title')}</h3>
+            <p class="text-red-200 mb-6">{$t('gameOver.death.message')}</p>
             <button class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium shadow-lg hover:shadow-xl" on:click={resetGame}>
-              Start New Adventure
+              {$t('common.startNewAdventure')}
             </button>
           </div>
         </div>
@@ -537,10 +539,10 @@
         <!-- Regular Game Over -->
         <div class="max-w-screen-md mx-auto px-4 mt-4">
           <div class="bg-indigo-100 dark:bg-indigo-900/50 border border-indigo-400 dark:border-indigo-500 rounded-lg p-6 text-center">
-            <h3 class="text-2xl font-bold mb-3">🎭 The End</h3>
-            <p class="text-gray-700 dark:text-gray-300 mb-4">Your story has concluded.</p>
+            <h3 class="text-2xl font-bold mb-3">🎭 {$t('gameOver.regular.title')}</h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4">{$t('gameOver.regular.message')}</p>
             <button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors" on:click={resetGame}>
-              Start New Adventure
+              {$t('common.startNewAdventure')}
             </button>
           </div>
         </div>
@@ -554,19 +556,19 @@
               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors"
               on:click={openSaveModal}
             >
-              💾 Save Game
+              💾 {$t('common.saveGame')}
             </button>
             <button
               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
               on:click={openLoadModal}
             >
-              📂 Load Game
+              📂 {$t('common.loadGame')}
             </button>
             <button
               class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm transition-colors"
               on:click={resetGame}
             >
-              Reset Game
+              {$t('common.resetGame')}
             </button>
           </div>
         </div>
@@ -596,19 +598,19 @@
   {#if showCustomPromptModal}
     <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl">
-        <h2 class="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">Create Custom Adventure</h2>
+        <h2 class="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">{$t('customPrompt.title')}</h2>
         <p class="text-gray-700 dark:text-gray-300 mb-4">
-          Enter your own story prompt or load from a text/markdown file. The AI will use your prompt to start the adventure.
+          {$t('customPrompt.description')}
         </p>
 
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Custom Prompt
+            {$t('customPrompt.label')}
           </label>
           <textarea
             bind:value={customPromptText}
             class="w-full h-48 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg p-3 border border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:outline-none resize-none"
-            placeholder="Example: You are a space explorer who has just discovered an ancient alien artifact on a remote planet. The artifact begins to glow as you approach it..."
+            placeholder={$t('customPrompt.placeholder')}
             disabled={isGeneratingPrompt || isOptimizingPrompt}
           ></textarea>
         </div>
@@ -622,9 +624,9 @@
           >
             {#if isGeneratingPrompt}
               <span class="inline-block animate-spin">⏳</span>
-              Generating...
+              {$t('customPrompt.generating')}
             {:else}
-              🎲 Generate Random Prompt
+              🎲 {$t('customPrompt.generateRandom')}
             {/if}
           </button>
           <button
@@ -634,9 +636,9 @@
           >
             {#if isOptimizingPrompt}
               <span class="inline-block animate-spin">⏳</span>
-              Optimizing...
+              {$t('customPrompt.optimizing')}
             {:else}
-              ✨ Optimize Your Prompt
+              ✨ {$t('customPrompt.optimizeYourPrompt')}
             {/if}
           </button>
         </div>
@@ -651,10 +653,9 @@
               class="mt-1 w-5 h-5 rounded border-gray-600 bg-gray-600 text-indigo-600 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <div class="flex-1">
-              <div class="font-medium text-gray-100">Enable Character Status Tracking</div>
+              <div class="font-medium text-gray-100">{$t('customPrompt.enableCharacterStatus')}</div>
               <p class="text-sm text-gray-400 mt-1">
-                Track health, stamina, conditions, and inventory throughout your adventure. This
-                adds RPG-style mechanics to your story.
+                {$t('customPrompt.characterStatusDescription')}
               </p>
             </div>
           </label>
@@ -665,7 +666,7 @@
                 class="w-full flex items-center justify-between text-gray-200 hover:text-white transition-colors mb-3"
                 on:click={() => showCustomStatusEditor = !showCustomStatusEditor}
               >
-                <span class="font-medium">⚙️ Customize Initial Character Status</span>
+                <span class="font-medium">⚙️ {$t('customPrompt.customizeInitialStatus')}</span>
                 <span class="text-xl">{showCustomStatusEditor ? '▼' : '▶'}</span>
               </button>
 
@@ -675,7 +676,7 @@
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <label class="block text-sm text-gray-300 mb-2">
-                        Health: {customCharacterStatus.health}
+                        {$t('customPrompt.health')}: {customCharacterStatus.health}
                       </label>
                       <input
                         type="range"
@@ -687,7 +688,7 @@
                     </div>
                     <div>
                       <label class="block text-sm text-gray-300 mb-2">
-                        Stamina: {customCharacterStatus.stamina}
+                        {$t('customPrompt.stamina')}: {customCharacterStatus.stamina}
                       </label>
                       <input
                         type="range"
@@ -701,7 +702,7 @@
 
                   <!-- Conditions -->
                   <div>
-                    <label class="block text-sm text-gray-300 mb-2">Starting Conditions</label>
+                    <label class="block text-sm text-gray-300 mb-2">{$t('customPrompt.startingConditions')}</label>
                     <div class="grid grid-cols-2 gap-2">
                       <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
                         <input
@@ -709,7 +710,7 @@
                           bind:checked={customCharacterStatus.conditions.injured}
                           class="w-4 h-4 rounded border-gray-600 bg-gray-600 text-red-600"
                         />
-                        <span>🩹 Injured</span>
+                        <span>🩹 {$t('customPrompt.conditionsLabel.injured')}</span>
                       </label>
                       <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
                         <input
@@ -717,7 +718,7 @@
                           bind:checked={customCharacterStatus.conditions.poisoned}
                           class="w-4 h-4 rounded border-gray-600 bg-gray-600 text-green-600"
                         />
-                        <span>☠️ Poisoned</span>
+                        <span>☠️ {$t('customPrompt.conditionsLabel.poisoned')}</span>
                       </label>
                       <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
                         <input
@@ -725,7 +726,7 @@
                           bind:checked={customCharacterStatus.conditions.blessed}
                           class="w-4 h-4 rounded border-gray-600 bg-gray-600 text-yellow-600"
                         />
-                        <span>✨ Blessed</span>
+                        <span>✨ {$t('customPrompt.conditionsLabel.blessed')}</span>
                       </label>
                       <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
                         <input
@@ -733,7 +734,7 @@
                           bind:checked={customCharacterStatus.conditions.cursed}
                           class="w-4 h-4 rounded border-gray-600 bg-gray-600 text-purple-600"
                         />
-                        <span>🌑 Cursed</span>
+                        <span>🌑 {$t('customPrompt.conditionsLabel.cursed')}</span>
                       </label>
                     </div>
                   </div>
@@ -741,14 +742,14 @@
                   <!-- Inventory -->
                   <div>
                     <label class="block text-sm text-gray-300 mb-2">
-                      Starting Inventory ({customCharacterStatus.inventory.length}/20)
+                      {$t('customPrompt.startingInventory')} ({customCharacterStatus.inventory.length}/20)
                     </label>
                     <div class="flex gap-2 mb-2">
                       <input
                         type="text"
                         bind:value={newInventoryItem}
                         on:keydown={(e) => e.key === 'Enter' && addInventoryItem()}
-                        placeholder="Add item (e.g., 'healing potion')"
+                        placeholder={$t('customPrompt.addItemPlaceholder')}
                         class="flex-1 bg-gray-700 text-gray-100 rounded px-3 py-2 text-sm border border-gray-600 focus:border-purple-500 focus:outline-none"
                         maxlength="50"
                       />
@@ -757,7 +758,7 @@
                         disabled={!newInventoryItem.trim() || customCharacterStatus.inventory.length >= 20}
                         class="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded text-sm transition-colors"
                       >
-                        Add
+                        {$t('customPrompt.add')}
                       </button>
                     </div>
                     {#if customCharacterStatus.inventory.length > 0}
@@ -777,7 +778,7 @@
                       </div>
                     {:else}
                       <div class="text-sm text-gray-500 italic text-center py-2 bg-gray-700/30 rounded">
-                        No starting items
+                        {$t('customPrompt.noStartingItems')}
                       </div>
                     {/if}
                   </div>
@@ -789,7 +790,7 @@
 
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Or Load from File
+            {$t('customPrompt.orLoadFromFile')}
           </label>
           <input
             type="file"
@@ -807,14 +808,14 @@
             on:click={() => (showCustomPromptModal = false)}
             disabled={isGeneratingPrompt || isOptimizingPrompt}
           >
-            Cancel
+            {$t('customPrompt.cancel')}
           </button>
           <button
             class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             on:click={startCustomGame}
             disabled={isGeneratingPrompt || isOptimizingPrompt}
           >
-            Start Adventure
+            {$t('customPrompt.startAdventure')}
           </button>
         </div>
       </div>

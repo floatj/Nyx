@@ -29,10 +29,12 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Estimate token cost and check budget
     const characterStatusEnabled = playRequest.characterStatusEnabled !== false; // Default to true if not specified
+    const language = playRequest.language || 'en'; // Default to English if not specified
     const systemPrompt = promptService.buildSystemPrompt(
       playRequest.mode,
       playRequest.customPrompt,
-      characterStatusEnabled
+      characterStatusEnabled,
+      language
     );
     const messages = await historyManager.prepareMessages(
       systemPrompt,
@@ -70,7 +72,8 @@ router.post('/', async (req: Request, res: Response) => {
           playRequest.mode,
           playRequest.customPrompt,
           characterStatusEnabled,
-          playRequest.customInitialCharacterStatus
+          playRequest.customInitialCharacterStatus,
+          language
         ),
       });
     }

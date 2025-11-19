@@ -1,0 +1,160 @@
+{
+  "app": {
+    "title": "夜神計畫",
+    "bossTitle": "Claude Code Web（研究預覽版）"
+  },
+  "common": {
+    "settings": "設定",
+    "saveGame": "儲存遊戲",
+    "loadGame": "載入遊戲",
+    "loadSavedGame": "載入已儲存的遊戲",
+    "resetGame": "重置遊戲",
+    "retry": "重試",
+    "startOver": "重新開始",
+    "startNewAdventure": "開始新冒險",
+    "error": "錯誤",
+    "theEnd": "結局",
+    "youHaveDied": "你已死亡"
+  },
+  "modeSelection": {
+    "title": "選擇你的冒險",
+    "subtitle": "選擇一個遊戲模式來開始你的旅程",
+    "modes": {
+      "dungeon": {
+        "name": "地牢探險",
+        "description": "探索充滿怪物、陷阱和寶藏的黑暗地下墓穴"
+      },
+      "journey": {
+        "name": "英雄之旅",
+        "description": "與同伴一起踏上史詩般的冒險，面對道德抉擇"
+      },
+      "mystery": {
+        "name": "神秘之夜",
+        "description": "在黑色電影風格的案件中尋找線索、調查嫌疑人，與時間賽跑"
+      },
+      "magical_girl": {
+        "name": "魔法少女戰鬥",
+        "description": "變身並使用魔法力量和友誼對抗黑暗勢力"
+      },
+      "time_traveler": {
+        "name": "時空旅人",
+        "description": "穿越時空以阻止世界末日的悖論，拯救現實"
+      },
+      "software_engineer": {
+        "name": "懶散辦公日",
+        "description": "作為軟體工程師，在下午的倦怠期努力裝忙求生存"
+      },
+      "bl_story": {
+        "name": "男同志愛情故事",
+        "description": "體驗兩位男性角色之間感人的浪漫故事"
+      },
+      "gl_story": {
+        "name": "女同志愛情故事",
+        "description": "體驗兩位女性角色之間感人的浪漫故事"
+      },
+      "alien_defense": {
+        "name": "外星防禦戰",
+        "description": "指揮地球軍隊對抗威脅人類的外星入侵"
+      },
+      "custom": {
+        "name": "自訂冒險",
+        "description": "使用自訂提示創建你自己的故事"
+      }
+    }
+  },
+  "customPrompt": {
+    "title": "創建自訂冒險",
+    "description": "輸入你自己的故事提示，或從文字/Markdown 檔案載入。AI 將使用你的提示來開始冒險。",
+    "label": "自訂提示",
+    "placeholder": "範例：你是一名太空探險家，剛剛在一顆遙遠的星球上發現了一個古老的外星文物。當你靠近時，文物開始發光...",
+    "generating": "生成中...",
+    "generateRandom": "生成隨機提示",
+    "optimizing": "優化中...",
+    "optimizeYourPrompt": "優化你的提示",
+    "enableCharacterStatus": "啟用角色狀態追蹤",
+    "characterStatusDescription": "在整個冒險過程中追蹤生命值、體力、狀態和物品欄。這會為你的故事增加 RPG 風格的機制。",
+    "customizeInitialStatus": "自訂初始角色狀態",
+    "health": "生命值",
+    "stamina": "體力",
+    "startingConditions": "初始狀態",
+    "conditionsLabel": {
+      "injured": "受傷",
+      "poisoned": "中毒",
+      "blessed": "祝福",
+      "cursed": "詛咒"
+    },
+    "startingInventory": "初始物品欄",
+    "addItemPlaceholder": "新增物品（例如：「治療藥水」）",
+    "add": "新增",
+    "noStartingItems": "沒有初始物品",
+    "orLoadFromFile": "或從檔案載入",
+    "cancel": "取消",
+    "startAdventure": "開始冒險"
+  },
+  "gameOver": {
+    "death": {
+      "title": "你已死亡",
+      "message": "你的旅程已悲劇性地結束。"
+    },
+    "regular": {
+      "title": "結局",
+      "message": "你的故事已經結束。"
+    }
+  },
+  "errors": {
+    "generic": "發生錯誤",
+    "failedToStart": "無法開始遊戲"
+  },
+  "settings": {
+    "title": "設定",
+    "darkMode": {
+      "label": "深色模式",
+      "description": "在淺色和深色主題之間切換"
+    },
+    "bossKey": {
+      "label": "老闆鍵",
+      "description": "啟用老闆鍵以快速隱藏遊戲介面"
+    },
+    "language": {
+      "label": "語言",
+      "description": "選擇你的首選語言，用於介面和遊戲提示",
+      "options": {
+        "en": "English",
+        "zh-TW": "繁體中文"
+      }
+    },
+    "aboutBossKey": {
+      "title": "關於老闆鍵",
+      "description": "按下",
+      "key": "Ctrl + /",
+      "action": "可在需要隱藏遊戲時快速切換到偽裝畫面。",
+      "tip": "當老闆走過來時非常實用！😉"
+    }
+  },
+  "gameSettings": {
+    "title": "遊戲設定",
+    "characterStatus": {
+      "label": "啟用角色狀態追蹤",
+      "description": "在整個遊戲過程中追蹤你的角色生命值、體力、狀態和物品欄"
+    },
+    "start": "開始遊戲"
+  },
+  "characterSheet": {
+    "title": "角色狀態",
+    "health": "生命值",
+    "stamina": "體力",
+    "conditions": "狀態",
+    "inventory": "物品欄",
+    "empty": "空",
+    "conditionLabels": {
+      "injured": "受傷",
+      "poisoned": "中毒",
+      "blessed": "祝福",
+      "cursed": "詛咒"
+    }
+  },
+  "choices": {
+    "customAction": "其他行動",
+    "customPlaceholder": "輸入你的自訂行動..."
+  }
+}
