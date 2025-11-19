@@ -1,12 +1,33 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { settingsStore, type Language } from '../stores/settingsStore';
   import { t } from '../i18n';
+  import { apiService, type ModelConfig } from '../services/api';
 
   export let onBack: () => void;
 
   $: darkMode = $settingsStore.darkMode;
   $: bossKeyEnabled = $settingsStore.bossKeyEnabled;
   $: language = $settingsStore.language;
+  $: defaultModel = $settingsStore.defaultModel;
+
+  let models: ModelConfig[] = [];
+  let loadingModels = true;
+  let modelsError: string | null = null;
+  let backendDefaultModel: string | undefined;
+
+  onMount(async () => {
+    try {
+      const response = await apiService.getModels();
+      models = response.models;
+      backendDefaultModel = response.defaultModel;
+      loadingModels = false;
+    } catch (error) {
+      console.error('Failed to load models:', error);
+      modelsError = error instanceof Error ? error.message : 'Failed to load models';
+      loadingModels = false;
+    }
+  });
 
   function handleDarkModeChange() {
     settingsStore.toggleDarkMode();
@@ -19,6 +40,12 @@
   function handleLanguageChange(event: Event) {
     const target = event.target as HTMLSelectElement;
     settingsStore.setLanguage(target.value as Language);
+  }
+
+  function handleModelChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const value = target.value === '' ? undefined : target.value;
+    settingsStore.setDefaultModel(value);
   }
 </script>
 
@@ -97,6 +124,45 @@
             <option value="en">{$t('settings.language.options.en')}</option>
             <option value="zh-TW">{$t('settings.language.options.zh-TW')}</option>
           </select>
+        </div>
+
+        <!-- Default Model Setting -->
+        <div class="py-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold mb-1">Default AI Model</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Choose the default AI model for new game sessions
+              </p>
+            </div>
+          </div>
+          {#if loadingModels}
+            <div class="text-sm text-gray-600 dark:text-gray-400">Loading models...</div>
+          {:else if modelsError}
+            <div class="text-sm text-red-600 dark:text-red-400">Error: {modelsError}</div>
+          {:else}
+            <select
+              value={defaultModel || ''}
+              on:change={handleModelChange}
+              class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+            >
+              <option value="">Use Backend Default ({backendDefaultModel})</option>
+              {#each models as model}
+                <option value={model.id}>
+                  {model.name} ({model.provider}) {model.recommended ? '⭐' : ''}
+                </option>
+              {/each}
+            </select>
+            {#if defaultModel}
+              {@const selectedModel = models.find(m => m.id === defaultModel)}
+              {#if selectedModel}
+                <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  <p><strong>Description:</strong> {selectedModel.description}</p>
+                  <p class="mt-1"><strong>Max Tokens:</strong> {selectedModel.max_tokens}</p>
+                </div>
+              {/if}
+            {/if}
+          {/if}
         </div>
 
         <!-- Info Section -->

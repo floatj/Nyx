@@ -102,7 +102,7 @@ Output ONLY the optimized prompt, nothing else.`;
       model: process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
       messages,
       temperature: 0.7,
-      max_tokens: 400,
+      max_tokens: 800, // Increased for better compatibility with larger models
     });
 
     const optimizedPrompt = response.choices[0]?.message?.content || prompt;
