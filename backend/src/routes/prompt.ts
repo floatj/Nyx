@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { openRouterClient } from '../services/openRouterClient.js';
+import { llmProvider } from '../services/llmProviderFactory.js';
+import type { Message } from '../types/index.js';
 
 const router = Router();
 
@@ -27,13 +28,13 @@ Examples of good prompts:
 
     const userPrompt = 'Generate a creative RPG story prompt.';
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
+    const messages: Message[] = [
+      { role: 'system' as const, content: systemPrompt },
+      { role: 'user' as const, content: userPrompt },
     ];
 
     // Use non-streaming completion for prompt generation
-    const response = await openRouterClient.complete({
+    const response = await llmProvider.complete({
       model: process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
       messages,
       temperature: 0.9, // Higher temperature for more creativity
@@ -69,9 +70,9 @@ router.post('/optimize', async (req: Request, res: Response) => {
 
 "${prompt.substring(0, 200)}"`;
 
-    const langResponse = await openRouterClient.complete({
+    const langResponse = await llmProvider.complete({
       model: process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
-      messages: [{ role: 'user', content: detectLanguagePrompt }],
+      messages: [{ role: 'user' as const, content: detectLanguagePrompt }] as Message[],
       temperature: 0.3,
       max_tokens: 50,
     });
@@ -93,12 +94,12 @@ Output ONLY the optimized prompt, nothing else.`;
 
     const userPrompt = `Optimize this RPG prompt:\n\n${prompt}`;
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
+    const messages: Message[] = [
+      { role: 'system' as const, content: systemPrompt },
+      { role: 'user' as const, content: userPrompt },
     ];
 
-    const response = await openRouterClient.complete({
+    const response = await llmProvider.complete({
       model: process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
       messages,
       temperature: 0.7,
