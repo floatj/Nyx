@@ -67,4 +67,5 @@ export interface ILLMProvider {
 export enum ProviderType {
   OPENROUTER = 'openrouter',
   GOOGLE_AI = 'google-ai',
+  ANTHROPIC = 'anthropic',
 }

@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { ILLMProvider, ProviderType } from './llmProvider.js';
 import { OpenRouterClient } from './openRouterClient.js';
 import { GoogleAIClient } from './googleAIClient.js';
+import { AnthropicClient } from './anthropicClient.js';
 
 /**
  * Factory for creating LLM provider instances
@@ -27,6 +28,8 @@ export class LLMProviderFactory {
     switch (type) {
       case ProviderType.GOOGLE_AI:
         return new GoogleAIClient();
+      case ProviderType.ANTHROPIC:
+        return new AnthropicClient();
       case ProviderType.OPENROUTER:
         return new OpenRouterClient();
       default:
@@ -59,19 +62,21 @@ export class LLMProviderFactory {
    * Auto-detect which provider to use based on available API keys
    */
   private static detectProvider(): ProviderType {
-    // Check if Google AI API key is available
+    if (process.env.ANTHROPIC_API_KEY) {
+      console.log('Detected Anthropic API key, using Anthropic provider');
+      return ProviderType.ANTHROPIC;
+    }
+
     if (process.env.GOOGLE_AI_API_KEY) {
       console.log('Detected Google AI API key, using Google AI provider');
       return ProviderType.GOOGLE_AI;
     }
 
-    // Check if OpenRouter API key is available
     if (process.env.OPENROUTER_API_KEY) {
       console.log('Detected OpenRouter API key, using OpenRouter provider');
       return ProviderType.OPENROUTER;
     }
 
-    // Default to OpenRouter
     console.warn(
       'No API keys detected, defaulting to OpenRouter (will fail if key not set)',
     );

@@ -9,7 +9,8 @@ const router = Router();
  */
 router.post('/', (req, res) => {
   try {
-    const sessionResponse = sessionManager.createSession();
+    const { tokenBudget } = req.body || {};
+    const sessionResponse = sessionManager.createSession(tokenBudget ? parseInt(tokenBudget) : undefined);
     res.json(sessionResponse);
   } catch (error) {
     console.error('Error creating session:', error);

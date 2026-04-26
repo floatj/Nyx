@@ -2,12 +2,16 @@ import { writable } from 'svelte/store';
 
 export type Language = 'en' | 'zh-TW';
 
+export const MAX_TOKEN_BUDGET = 100000;
+export const DEFAULT_TOKEN_BUDGET = 20000;
+
 export interface SettingsState {
   darkMode: boolean;
   bossKeyEnabled: boolean;
   isBossMode: boolean;
   language: Language;
-  defaultModel?: string; // Default model ID for new sessions
+  defaultModel?: string;
+  tokenBudget: number;
 }
 
 const SETTINGS_STORAGE_KEY = 'nyx_settings';
@@ -15,7 +19,7 @@ const SETTINGS_STORAGE_KEY = 'nyx_settings';
 // Load settings from localStorage
 function loadSettings(): SettingsState {
   if (typeof window === 'undefined') {
-    return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en', defaultModel: undefined };
+    return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en', defaultModel: undefined, tokenBudget: DEFAULT_TOKEN_BUDGET };
   }
 
   try {
@@ -26,9 +30,10 @@ function loadSettings(): SettingsState {
       const settings = {
         darkMode: parsed.darkMode ?? true,
         bossKeyEnabled: parsed.bossKeyEnabled ?? false,
-        isBossMode: false, // Always start with boss mode off
+        isBossMode: false,
         language: (parsed.language ?? 'en') as Language,
         defaultModel: parsed.defaultModel,
+        tokenBudget: parsed.tokenBudget ?? DEFAULT_TOKEN_BUDGET,
       };
       console.log('[SettingsStore] Loaded settings:', settings);
       return settings;
@@ -38,7 +43,7 @@ function loadSettings(): SettingsState {
   }
 
   console.log('[SettingsStore] Using default settings');
-  return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en', defaultModel: undefined };
+  return { darkMode: true, bossKeyEnabled: false, isBossMode: false, language: 'en', defaultModel: undefined, tokenBudget: DEFAULT_TOKEN_BUDGET };
 }
 
 // Save settings to localStorage
@@ -52,6 +57,7 @@ function saveSettings(settings: SettingsState): void {
       bossKeyEnabled: settings.bossKeyEnabled,
       language: settings.language,
       defaultModel: settings.defaultModel,
+      tokenBudget: settings.tokenBudget,
     };
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(toSave));
   } catch (error) {
@@ -125,6 +131,15 @@ function createSettingsStore() {
     setDefaultModel: (modelId: string | undefined) => {
       update((state) => {
         const newState = { ...state, defaultModel: modelId };
+        saveSettings(newState);
+        return newState;
+      });
+    },
+
+    setTokenBudget: (budget: number) => {
+      update((state) => {
+        const clamped = Math.min(Math.max(budget, 1000), MAX_TOKEN_BUDGET);
+        const newState = { ...state, tokenBudget: clamped };
         saveSettings(newState);
         return newState;
       });

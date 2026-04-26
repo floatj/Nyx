@@ -11,6 +11,7 @@ const router = Router();
  */
 router.post('/generate', async (req: Request, res: Response) => {
   try {
+    const { model } = req.body;
     const systemPrompt = `You are a creative RPG story generator. Generate a unique and engaging RPG story setting/scenario prompt.
 Be creative, diverse, and include interesting elements that would make for an exciting text-based RPG adventure.
 
@@ -35,7 +36,7 @@ Examples of good prompts:
 
     // Use non-streaming completion for prompt generation
     const response = await llmProvider.complete({
-      model: process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
+      model: model || process.env.MODEL_DEFAULT || 'anthropic/claude-haiku-4-5',
       messages,
       temperature: 0.9, // Higher temperature for more creativity
       max_tokens: 300,
@@ -59,11 +60,13 @@ Examples of good prompts:
  */
 router.post('/optimize', async (req: Request, res: Response) => {
   try {
-    const { prompt } = req.body;
+    const { prompt, model } = req.body;
 
     if (!prompt || typeof prompt !== 'string') {
       return res.status(400).json({ error: 'Prompt is required' });
     }
+
+    const resolvedModel = model || process.env.MODEL_DEFAULT || 'anthropic/claude-haiku-4-5';
 
     // Detect the language of the input prompt
     const detectLanguagePrompt = `Detect the language of this text and respond with ONLY the language name (e.g., "English", "Chinese", "Spanish", etc.):
@@ -71,7 +74,7 @@ router.post('/optimize', async (req: Request, res: Response) => {
 "${prompt.substring(0, 200)}"`;
 
     const langResponse = await llmProvider.complete({
-      model: process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
+      model: resolvedModel,
       messages: [{ role: 'user' as const, content: detectLanguagePrompt }] as Message[],
       temperature: 0.3,
       max_tokens: 50,
@@ -100,7 +103,7 @@ Output ONLY the optimized prompt, nothing else.`;
     ];
 
     const response = await llmProvider.complete({
-      model: process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
+      model: resolvedModel,
       messages,
       temperature: 0.7,
       max_tokens: 800, // Increased for better compatibility with larger models

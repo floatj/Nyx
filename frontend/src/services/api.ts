@@ -48,12 +48,13 @@ export class ApiService {
   /**
    * Create a new game session
    */
-  async createSession(): Promise<SessionResponse> {
+  async createSession(tokenBudget?: number): Promise<SessionResponse> {
     const response = await fetch(`${API_URL}/api/session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ tokenBudget }),
     });
 
     if (!response.ok) {
@@ -146,12 +147,13 @@ export class ApiService {
   /**
    * Generate a random RPG story prompt
    */
-  async generatePrompt(): Promise<string> {
+  async generatePrompt(model?: string): Promise<string> {
     const response = await fetch(`${API_URL}/api/prompt/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ model }),
     });
 
     if (!response.ok) {
@@ -165,13 +167,13 @@ export class ApiService {
   /**
    * Optimize an existing prompt
    */
-  async optimizePrompt(prompt: string): Promise<string> {
+  async optimizePrompt(prompt: string, model?: string): Promise<string> {
     const response = await fetch(`${API_URL}/api/prompt/optimize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt, model }),
     });
 
     if (!response.ok) {

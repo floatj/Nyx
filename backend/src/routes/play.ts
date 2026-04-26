@@ -95,7 +95,7 @@ router.post('/', async (req: Request, res: Response) => {
     try {
       // Stream from LLM provider
       for await (const chunk of llmProvider.streamCompletion({
-        model: playRequest.model || process.env.MODEL_DEFAULT || 'anthropic/claude-3-haiku',
+        model: selectedModel,
         messages,
         temperature: playRequest.temperature,
         max_tokens: maxCompletionTokens,

@@ -66,7 +66,8 @@ EXACT FORMAT (copy this structure):
 
 const CLOSING_REMINDER = `
 
-IMPORTANT: Do NOT wrap in markdown code blocks. Output the raw JSON only.`;
+IMPORTANT: Do NOT wrap in markdown code blocks. Output the raw JSON only.
+REMINDER: Your ENTIRE response must be a single valid JSON object starting with { and ending with }. No text before or after the JSON.`;
 
 const MODE_LORE: Record<GameMode, string> = {
   dungeon: `SETTING: Gritty fantasy catacombs beneath an ancient castle
@@ -348,20 +349,19 @@ ${SAFETY_ADDENDUM}`;
    * Extract JSON from LLM response, handling various formats
    */
   parseModelOutput(text: string): { narration: string; choices: any[]; meta?: any } {
-    // Log raw output for debugging
     console.log('=== RAW LLM OUTPUT ===');
-    console.log(text.substring(0, 500)); // First 500 chars
+    console.log(text.substring(0, 500));
     console.log('=== END RAW OUTPUT ===');
 
-    // Try direct parse
+    // 1. Try direct parse
     try {
-      const parsed = JSON.parse(text);
+      const parsed = JSON.parse(text.trim());
       console.log(`✅ Direct JSON parse successful. Choices: ${parsed.choices?.length || 0}`);
       return parsed;
     } catch {}
 
-    // Try extracting from markdown code block
-    const codeBlockMatch = text.match(/```json?\s*(\{[\s\S]*?\})\s*```/);
+    // 2. Try extracting from markdown code block (```json ... ```)
+    const codeBlockMatch = text.match(/```json?\s*([\s\S]*?)\s*```/);
     if (codeBlockMatch) {
       try {
         const parsed = JSON.parse(codeBlockMatch[1]);
@@ -370,7 +370,7 @@ ${SAFETY_ADDENDUM}`;
       } catch {}
     }
 
-    // Try extracting JSON object from text
+    // 3. Try extracting largest { } block containing "narration"
     const jsonMatch = text.match(/\{[\s\S]*"narration"[\s\S]*\}/);
     if (jsonMatch) {
       try {
@@ -380,9 +380,47 @@ ${SAFETY_ADDENDUM}`;
       } catch {}
     }
 
-    // Fallback: treat as plain text
+    // 4. Handle mixed markdown format: narrative text followed by **characterStatus**: {...} and **choices**: [...]
+    const hasMarkdownFields =
+      /\*\*characterStatus\*\*|\*\*choices\*\*/i.test(text) ||
+      /\*\*choices\*\*/i.test(text);
+
+    if (hasMarkdownFields) {
+      try {
+        // Extract narration: everything before the first ** field marker
+        const narrationMatch = text.match(/^([\s\S]*?)(?=\*\*(?:characterStatus|choices|meta)\*\*)/i);
+        const narration = narrationMatch ? narrationMatch[1].trim() : '';
+
+        // Extract characterStatus JSON block
+        let characterStatus: any = undefined;
+        const csMatch = text.match(/\*\*characterStatus\*\*\s*:\s*(\{[\s\S]*?\})(?=\s*\*\*|\s*$)/i);
+        if (csMatch) {
+          try { characterStatus = JSON.parse(csMatch[1]); } catch {}
+        }
+
+        // Extract choices JSON array
+        let choices: any[] = [];
+        const choicesMatch = text.match(/\*\*choices\*\*\s*:\s*(\[[\s\S]*?\])(?=\s*\*\*|\s*$)/i);
+        if (choicesMatch) {
+          try { choices = JSON.parse(choicesMatch[1]); } catch {}
+        }
+
+        // Extract meta JSON block
+        let meta: any = undefined;
+        const metaMatch = text.match(/\*\*meta\*\*\s*:\s*(\{[\s\S]*?\})(?=\s*\*\*|\s*$)/i);
+        if (metaMatch) {
+          try { meta = JSON.parse(metaMatch[1]); } catch {}
+        }
+
+        if (narration || choices.length > 0) {
+          console.log(`✅ Markdown field extraction successful. Choices: ${choices.length}`);
+          return { narration, choices, characterStatus, meta };
+        }
+      } catch {}
+    }
+
+    // 5. Last resort: treat whole text as narration
     console.warn('❌ Failed to parse JSON from model output, using fallback');
-    console.warn('Text length:', text.length);
     return {
       narration: text,
       choices: [{ id: 'continue', label: 'Continue' }],

@@ -23,6 +23,7 @@
   let showGameSettingsModal = false;
   let pendingGameMode: GameMode | null = null;
   let showCustomPromptModal = false;
+  const CUSTOM_PROMPT_STORAGE_KEY = 'nyx_custom_prompt';
   let customPromptText = '';
   let customCharacterStatusEnabled = settingsService.isCharacterStatusEnabled();
   let customCharacterStatus = {
@@ -103,7 +104,7 @@
       gameStore.dispatch({ type: 'START_GAME' });
 
       // Create session
-      const session = await apiService.createSession();
+      const session = await apiService.createSession($settingsStore.tokenBudget);
       tokenBudget = session.tokenBudget;
 
       gameStore.dispatch({
@@ -221,7 +222,7 @@
 
   function openCustomPromptModal() {
     showCustomPromptModal = true;
-    customPromptText = '';
+    customPromptText = localStorage.getItem(CUSTOM_PROMPT_STORAGE_KEY) || '';
     customCharacterStatusEnabled = settingsService.isCharacterStatusEnabled();
     // Reset custom character status to defaults
     customCharacterStatus = {
@@ -259,6 +260,7 @@
     reader.onload = (e) => {
       const content = e.target?.result as string;
       customPromptText = content;
+      localStorage.setItem(CUSTOM_PROMPT_STORAGE_KEY, content);
     };
     reader.readAsText(file);
   }
@@ -266,8 +268,9 @@
   async function generateRandomPrompt() {
     try {
       isGeneratingPrompt = true;
-      const prompt = await apiService.generatePrompt();
+      const prompt = await apiService.generatePrompt($gameStore.selectedModel || $settingsStore.defaultModel);
       customPromptText = prompt;
+      localStorage.setItem(CUSTOM_PROMPT_STORAGE_KEY, prompt);
     } catch (error) {
       console.error('Failed to generate prompt:', error);
       alert('Failed to generate prompt. Please try again.');
@@ -284,8 +287,9 @@
 
     try {
       isOptimizingPrompt = true;
-      const optimized = await apiService.optimizePrompt(customPromptText);
+      const optimized = await apiService.optimizePrompt(customPromptText, $gameStore.selectedModel || $settingsStore.defaultModel);
       customPromptText = optimized;
+      localStorage.setItem(CUSTOM_PROMPT_STORAGE_KEY, optimized);
     } catch (error) {
       console.error('Failed to optimize prompt:', error);
       alert('Failed to optimize prompt. Please try again.');
@@ -660,6 +664,7 @@
           </label>
           <textarea
             bind:value={customPromptText}
+            on:input={() => localStorage.setItem(CUSTOM_PROMPT_STORAGE_KEY, customPromptText)}
             class="w-full h-48 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg p-3 border border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:outline-none resize-none"
             placeholder={$t('customPrompt.placeholder')}
             disabled={isGeneratingPrompt || isOptimizingPrompt}

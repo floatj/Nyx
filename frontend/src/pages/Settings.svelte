@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { settingsStore, type Language } from '../stores/settingsStore';
+  import { settingsStore, type Language, MAX_TOKEN_BUDGET, DEFAULT_TOKEN_BUDGET } from '../stores/settingsStore';
   import { t } from '../i18n';
   import { apiService, type ModelConfig } from '../services/api';
 
@@ -10,6 +10,12 @@
   $: bossKeyEnabled = $settingsStore.bossKeyEnabled;
   $: language = $settingsStore.language;
   $: defaultModel = $settingsStore.defaultModel;
+  $: tokenBudget = $settingsStore.tokenBudget ?? DEFAULT_TOKEN_BUDGET;
+
+  function handleTokenBudgetChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    settingsStore.setTokenBudget(parseInt(target.value));
+  }
 
   let models: ModelConfig[] = [];
   let loadingModels = true;
@@ -163,6 +169,46 @@
               {/if}
             {/if}
           {/if}
+        </div>
+
+        <!-- Token Budget Setting -->
+        <div class="py-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="mb-3">
+            <h3 class="text-lg font-semibold mb-1">Token Budget per Session</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Maximum tokens allowed per game session. Takes effect on the next new game.
+            </p>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">1,000</span>
+              <span class="font-semibold text-indigo-600 dark:text-indigo-400 text-base">
+                {tokenBudget.toLocaleString()} tokens
+              </span>
+              <span class="text-gray-500 dark:text-gray-400">100,000</span>
+            </div>
+            <input
+              type="range"
+              min="1000"
+              max={MAX_TOKEN_BUDGET}
+              step="1000"
+              value={tokenBudget}
+              on:input={handleTokenBudgetChange}
+              class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            />
+            <div class="flex gap-2 flex-wrap">
+              {#each [10000, 20000, 50000, 100000] as preset}
+                <button
+                  on:click={() => settingsStore.setTokenBudget(preset)}
+                  class="px-3 py-1 text-xs rounded-full border transition-colors {tokenBudget === preset
+                    ? 'bg-indigo-600 text-white border-indigo-600'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-indigo-400'}"
+                >
+                  {(preset / 1000).toFixed(0)}k
+                </button>
+              {/each}
+            </div>
+          </div>
         </div>
 
         <!-- Info Section -->

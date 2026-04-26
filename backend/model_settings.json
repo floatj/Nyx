@@ -1,6 +1,45 @@
 {
   "models": [
     {
+      "id": "google/gemini-3-pro-preview",
+      "name": "Gemini 3 Pro Preview",
+      "provider": "Google",
+      "max_tokens": 4000,
+      "temperature": 0.7,
+      "description": "Latest Gemini 3 Pro — 1M context, multimodal, thinking levels",
+      "recommended": true,
+      "capabilities": {
+        "streaming": true,
+        "json_mode": false
+      }
+    },
+    {
+      "id": "google/gemini-3.1-flash-lite-preview",
+      "name": "Gemini 3.1 Flash Lite Preview",
+      "provider": "Google",
+      "max_tokens": 2000,
+      "temperature": 0.7,
+      "description": "Latest Gemini 3.1 Flash Lite — fast and cost-efficient",
+      "recommended": false,
+      "capabilities": {
+        "streaming": true,
+        "json_mode": false
+      }
+    },
+    {
+      "id": "google/gemini-2.5-flash",
+      "name": "Gemini 2.5 Flash",
+      "provider": "Google",
+      "max_tokens": 3000,
+      "temperature": 0.7,
+      "description": "Gemini 2.5 Flash GA — fast, capable, great value",
+      "recommended": true,
+      "capabilities": {
+        "streaming": true,
+        "json_mode": false
+      }
+    },
+    {
       "id": "google/gemini-2.5-pro",
       "name": "Gemini 2.5 Pro",
       "provider": "Google",
@@ -27,12 +66,12 @@
       }
     },
     {
-      "id": "anthropic/claude-3-haiku",
-      "name": "Claude 3 Haiku",
+      "id": "anthropic/claude-haiku-4-5",
+      "name": "Claude Haiku 4.5",
       "provider": "Anthropic",
       "max_tokens": 2000,
       "temperature": 0.7,
-      "description": "Balanced performance with good reasoning",
+      "description": "Fastest and most affordable Claude 4 model",
       "recommended": false,
       "capabilities": {
         "streaming": true,
@@ -40,13 +79,26 @@
       }
     },
     {
-      "id": "anthropic/claude-3.5-sonnet",
-      "name": "Claude 3.5 Sonnet",
+      "id": "anthropic/claude-sonnet-4-6",
+      "name": "Claude Sonnet 4.6",
       "provider": "Anthropic",
       "max_tokens": 3000,
       "temperature": 0.7,
-      "description": "Advanced reasoning and creative storytelling",
+      "description": "Balanced speed and quality from Claude 4 generation",
       "recommended": true,
+      "capabilities": {
+        "streaming": true,
+        "json_mode": true
+      }
+    },
+    {
+      "id": "anthropic/claude-opus-4-7",
+      "name": "Claude Opus 4.7",
+      "provider": "Anthropic",
+      "max_tokens": 4000,
+      "temperature": 0.7,
+      "description": "Most capable Claude model",
+      "recommended": false,
       "capabilities": {
         "streaming": true,
         "json_mode": true

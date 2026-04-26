@@ -4,20 +4,25 @@ import type { Session, SessionResponse } from '../types/index.js';
 
 export class SessionManager {
   private sessions: Map<string, Session> = new Map();
-  private readonly defaultBudget = parseInt(process.env.TOKEN_BUDGET_PER_SESSION || '20000');
+  private readonly defaultBudget = parseInt(process.env.TOKEN_BUDGET_PER_SESSION || '100000');
+  private readonly maxBudget = 100000;
   private readonly sessionExpiry = 7 * 24 * 60 * 60 * 1000; // 7 days
 
   /**
-   * Create a new anonymous session
+   * Create a new anonymous session with an optional custom token budget
    */
-  createSession(): SessionResponse {
+  createSession(requestedBudget?: number): SessionResponse {
     const sessionId = randomBytes(16).toString('hex');
     const token = randomBytes(32).toString('hex');
+
+    const budget = requestedBudget
+      ? Math.min(Math.max(requestedBudget, 1000), this.maxBudget)
+      : this.defaultBudget;
 
     const session: Session = {
       id: sessionId,
       tokenUsed: 0,
-      tokenBudget: this.defaultBudget,
+      tokenBudget: budget,
       createdAt: Date.now(),
       lastActive: Date.now(),
     };
@@ -30,7 +35,7 @@ export class SessionManager {
     return {
       sessionId,
       token,
-      tokenBudget: this.defaultBudget,
+      tokenBudget: budget,
       expiresIn: this.sessionExpiry / 1000, // seconds
     };
   }
